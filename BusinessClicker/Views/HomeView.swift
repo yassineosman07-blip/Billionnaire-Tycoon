@@ -8,7 +8,7 @@ struct HomeView: View {
         Screen {
             HStack {
                 VStack(alignment: .leading, spacing: 6) { Text("CHAQUE JOUR COMPTE").font(.caption2.weight(.bold)).tracking(2).foregroundStyle(Palette.accent); Text("À vous de jouer, \(game.world.name). ").font(.title2.weight(.bold)) }
-                Spacer(); Image(systemName: game.world.avatar).font(.largeTitle).foregroundStyle(Palette.lavender)
+                Spacer(); Portrait(person: game.portraitID, size: 52)
             }
             Panel {
                 HStack { Label("TRÉSORERIE", systemImage: "wallet.bifold.fill").font(.caption.weight(.semibold)).tracking(1).foregroundStyle(.secondary); Spacer(); Text("JOUR \(game.world.day)").font(.caption.weight(.bold)).padding(8).background(Palette.accent.opacity(0.16), in: Capsule()) }
@@ -22,7 +22,7 @@ struct HomeView: View {
             Panel {
                 HStack { Metric(label: "Fortune nette", value: game.value(game.world.netWorth), symbol: "diamond"); Metric(label: "Bénéfice prévu", value: game.value(game.forecast)) }
                 Divider()
-                HStack { Metric(label: "Entreprises", value: "\(game.world.businesses.count) / 40", symbol: "building.2"); Metric(label: "Réputation", value: "\(Int(game.world.reputation)) / 100", symbol: "star") }
+                HStack { Metric(label: "Entreprises", value: "\(game.world.businesses.count) établissements", symbol: "building.2"); Metric(label: "Réputation", value: "\(Int(game.world.reputation)) / 100", symbol: "star") }
             }
             NavigationLink { BusinessDetailView(id: 0) } label: {
                 Panel {

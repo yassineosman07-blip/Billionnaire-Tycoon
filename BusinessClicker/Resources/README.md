@@ -1,5 +1,9 @@
-# Ressources
+# Ressources de la refonte
 
-Les cinq WAV, l’icône opaque 1024×1024 et les formes des écrans ont été créés pour ce projet, sans emprunt à une banque de ressources externe. L’ambiance est un accord synthétique court et discret. Les personnages et entreprises sont fictifs. Les pictogrammes sont fournis par les SF Symbols installés sur iOS, à utiliser selon la licence Apple applicable aux applications Apple. Aucune police tierce n’est embarquée.
+Les 19 WAV sont des sons et ambiances synthétiques originaux créés pour le projet. L’icône et les modèles de ville et de boutiques sont des créations géométriques originales définies dans le dépôt. Les pictogrammes de commandes utilisent les SF Symbols installés sur iOS, soumis aux conditions Apple applicables.
 
-`PrivacyInfo.xcprivacy` déclare l’absence de collecte et de suivi. Les notifications sont locales, facultatives et demandées uniquement lorsque le joueur active leur réglage.
+`Portraits.png` contient 36 portraits illustrés originaux de style 3D cartoon, générés pour Business Clicker le 4 novembre 2026. Ils sont découpés au chargement par `PortraitCache`, sans accès réseau. Ce ne sont ni des photographies de personnes réelles ni les ressources de la référence filigranée du créateur.
+
+Les photographies commerciales des 32 articles ne sont pas encore intégrées. `media-manifest.json` recense les fichiers attendus et leur état. Aucun usage autorisé n’est inventé ; une photo doit être vérifiée avec sa provenance et sa licence avant importation. L’application affiche explicitement un visuel indisponible en attendant. Le contrôle `scripts/validate-assets.py --require-photos` bloque la validation média tant que ces fichiers manquent.
+
+`PrivacyInfo.xcprivacy` déclare l’absence de collecte et de suivi. Les notifications sont locales et facultatives. Le site de rencontre est une activité fictive hors ligne, sans compte ni personne réelle.

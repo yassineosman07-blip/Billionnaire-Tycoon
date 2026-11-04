@@ -1,66 +1,114 @@
 import SwiftUI
+import SceneKit
 
 struct CityView: View {
     @EnvironmentObject private var game: GameViewModel
-    @State private var selected = 0
-    @State private var zoom = 1.0
-    private var district: District { Catalog.districts[selected] }
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var selectedBranch: Int? = 0
+    @State private var selectedPlot: Int? = nil
+    @State private var chosenType = 2
+    @State private var selectedProperty: Int?
     var body: some View {
         Screen {
-            HStack { Text("Une ville. Votre empreinte.").foregroundStyle(.secondary); Spacer(); Image(systemName: "hand.draw").foregroundStyle(Palette.accent) }
-            ScrollView([.horizontal, .vertical]) {
-                ZStack {
-                    Color(red: 0.12, green: 0.17, blue: 0.20)
-                    Canvas { context, size in
-                        for i in 0..<9 {
-                            var a = Path(); a.move(to: CGPoint(x: 0, y: CGFloat(i) * 78)); a.addLine(to: CGPoint(x: 720, y: CGFloat(i) * 78 + 360))
-                            context.stroke(a, with: .color(.white.opacity(0.055)), lineWidth: 12)
-                            var b = Path(); b.move(to: CGPoint(x: 720, y: CGFloat(i) * 78)); b.addLine(to: CGPoint(x: 0, y: CGFloat(i) * 78 + 360))
-                            context.stroke(b, with: .color(.white.opacity(0.055)), lineWidth: 12)
-                        }
-                    }
-                    ForEach(Catalog.districts) { d in
-                        districtTile(d).position(position(d.id))
-                    }
-                    VStack { Spacer(); HStack { Label("BUSINESS CITY", systemImage: "location.north.fill").font(.caption2.weight(.heavy)).tracking(2).foregroundStyle(.white.opacity(0.4)); Spacer() }.padding(24) }
-                }.frame(width: 720, height: 580).scaleEffect(zoom, anchor: .topLeading).frame(width: 720 * zoom, height: 580 * zoom, alignment: .topLeading)
-            }.frame(height: 350).clipShape(RoundedRectangle(cornerRadius: 24)).accessibilityLabel("Carte de la ville, défilement dans les deux directions")
-            HStack { Image(systemName: "minus.magnifyingglass"); Slider(value: $zoom, in: 0.65...1.6); Image(systemName: "plus.magnifyingglass") }.foregroundStyle(Palette.accent).accessibilityLabel("Zoom de la carte")
-            Panel(district.name) {
-                HStack { Metric(label: "Popularité", value: "\(Int(district.popularity * 100)) / 100", symbol: "person.3.fill"); Metric(label: "Concurrence", value: "\(Int(district.competition * 100)) %", symbol: "chart.bar.fill") }
-                LineItem(label: "Niveau de richesse", value: "\(Int(district.wealth * 100)) / 100"); LineItem(label: "Installation", value: game.value(district.installation))
-                LineItem(label: "Loyer commercial de base", value: game.value(district.rent))
-                let accessible = game.world.netWorth >= district.unlock
-                Label(accessible ? "Quartier accessible" : "Découverte à \(game.value(district.unlock)) de fortune", systemImage: accessible ? "checkmark.circle" : "lock.fill").font(.caption).foregroundStyle(accessible ? Palette.mint : .secondary)
-            }
-            ForEach(Catalog.businesses.filter { $0.district == selected }) { d in NavigationLink { BusinessDetailView(id: d.id) } label: {
-                HStack { IconBadge(symbol: d.symbol); VStack(alignment: .leading) { Text(d.name).font(.subheadline.bold()); Text(game.world.businesses.first(where: { $0.id == d.id }).map { "Votre entreprise · niveau \($0.level)" } ?? "À acquérir").font(.caption).foregroundStyle(.secondary) }; Spacer(); Image(systemName: "chevron.right") }.padding(12).background(Palette.surface, in: RoundedRectangle(cornerRadius: 18))
-            }.buttonStyle(.plain) }
-            ForEach(Catalog.properties.filter { $0.district == selected }) { p in NavigationLink { PropertyDetailView(id: p.id) } label: { HStack { Image(systemName: "house.fill").foregroundStyle(Palette.mint); Text(p.name); Spacer(); Image(systemName: "chevron.right") }.font(.subheadline).padding(16).background(Palette.surface, in: RoundedRectangle(cornerRadius: 18)) }.buttonStyle(.plain) }
-        }.navigationTitle("La carte")
-    }
-    private func position(_ id: Int) -> CGPoint {
-        let points = [CGPoint(x: 200, y: 370), CGPoint(x: 360, y: 440), CGPoint(x: 360, y: 250), CGPoint(x: 520, y: 330), CGPoint(x: 510, y: 145)]
-        return points[id]
-    }
-    private func districtTile(_ d: District) -> some View {
-        let owned = game.world.businesses.filter { Catalog.businesses[$0.id].district == d.id }
-        let level = owned.map(\.level).max() ?? 0
-        return Button { selected = d.id } label: {
-            VStack(spacing: 3) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12).fill(d.id == selected ? Palette.accent.opacity(0.4) : Palette.lavender.opacity(0.06)).frame(width: 146, height: 78).rotationEffect(.degrees(-25))
-                    HStack(alignment: .bottom, spacing: 5) {
-                        ForEach(0..<3) { i in
-                            VStack(spacing: 5) {
-                                ForEach(0..<max(1, min(5, 1 + level / 20 + i))) { _ in HStack(spacing: 4) { Rectangle().fill(Palette.mint.opacity(owned.isEmpty ? 0.15 : 0.8)).frame(width: 5, height: 5); Rectangle().fill(Palette.mint.opacity(0.4)).frame(width: 5, height: 5) } }
-                            }.padding(8).background(owned.isEmpty ? Palette.surface : Palette.accent.opacity(0.65), in: UnevenRoundedRectangle(topLeadingRadius: 4, topTrailingRadius: 4)).offset(y: -15)
-                        }
-                    }
+            Text("Une ville en mouvement. Votre réseau prend vie.").foregroundStyle(.secondary)
+            CityViewport(businesses: game.world.businesses, properties: game.world.properties, active: game.active, reduced: reduceMotion || game.world.settings.reducedMotion) { branch, plot, property in
+                selectedBranch = branch; selectedPlot = plot; selectedProperty = property; game.feedback.play("click", settings: game.world.settings)
+            }.frame(height: 410).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(alignment: .bottomLeading) {
+                Label("Glisser · déplacer    Pincer · zoomer", systemImage: "hand.draw").font(.caption2.bold()).padding(12).background(.ultraThinMaterial, in: Capsule()).padding(10)
+            }.accessibilityLabel("Ville 3D. Glisser pour déplacer, pincer pour zoomer, toucher un bâtiment pour le sélectionner.")
+            if let id = selectedBranch, let b = game.world.businesses.first(where: { $0.id == id }) {
+                Panel(b.name) {
+                    HStack { IconBadge(symbol: Catalog.businesses[b.definitionID].symbol); Metric(label: Catalog.districts[b.districtID].name, value: "Niveau \(b.level)") }
+                    LineItem(label: "Parcelle", value: "\((b.plot ?? 0) % 24 + 1)")
+                    NavigationLink { BusinessDetailView(id: b.id) } label: { Label("Gérer cet établissement", systemImage: "building.2") }
                 }
-                Text(d.name).font(.caption.weight(.semibold)).foregroundStyle(.white)
-                Text("\(owned.count) entreprise(s)").font(.caption2).foregroundStyle(Palette.mint)
-            }.frame(width: 170)
-        }.buttonStyle(.plain).accessibilityLabel("\(d.name), \(owned.count) entreprises possédées")
+            } else if let plot = selectedPlot {
+                Panel("Parcelle \(plot % 24 + 1) · \(Catalog.districts[plot / 24].name)") {
+                    Text("Une adresse pour votre prochain projet. Les bâtiments de ce terrain seront remplacés à l’ouverture de votre établissement.").font(.caption).foregroundStyle(.secondary)
+                    Picker("Activité", selection: $chosenType) { ForEach(Catalog.businesses) { Text($0.name).tag($0.id) } }
+                    NavigationLink { OpenBusinessView(type: chosenType, suggestedDistrict: plot / 24, suggestedPlot: plot) } label: { Label("Ouvrir à cette adresse", systemImage: "plus.circle") }
+                }
+            }
+            if let property = selectedProperty {
+                Panel(Catalog.properties[property].name) {
+                    Text("Quartier résidentiel · \(Catalog.properties[property].kind)").font(.subheadline).foregroundStyle(.secondary)
+                    NavigationLink("Consulter et gérer ce bien") { PropertyDetailView(id: property) }
+                }
+            }
+            Panel("Vos adresses · accès accessible") {
+                ForEach(game.world.businesses) { b in NavigationLink { BusinessDetailView(id: b.id) } label: { HStack { Text(b.name); Spacer(); Text("Niv. \(b.level)").foregroundStyle(.secondary) }.font(.subheadline) }.buttonStyle(.plain) }
+            }
+            ForEach(Catalog.districts) { district in
+                Panel(district.name) {
+                    LineItem(label: "Popularité / concurrence", value: "\(Int(district.popularity * 100)) / \(Int(district.competition * 100))")
+                    ForEach(Catalog.properties.filter { $0.district == district.id }) { property in NavigationLink(property.name) { PropertyDetailView(id: property.id) } }
+                }
+            }
+        }.navigationTitle("Votre ville")
+    }
+}
+struct CityViewport: UIViewRepresentable {
+    let businesses: [Business]
+    let properties: [Property]
+    var active = true
+    var reduced: Bool
+    var select: (Int?, Int?, Int?) -> Void
+    func makeCoordinator() -> Coordinator { Coordinator(select: select) }
+    func makeUIView(context: Context) -> SCNView {
+        let view = PausableCityView(frame: .zero, options: nil); view.backgroundColor = .clear; view.antialiasingMode = .multisampling2X; view.preferredFramesPerSecond = 30
+        view.isPlaying = true; view.autoenablesDefaultLighting = false; view.allowsCameraControl = false
+        view.addGestureRecognizer(UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.pan(_:))))
+        view.addGestureRecognizer(UIPinchGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.pinch(_:))))
+        view.addGestureRecognizer(UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap(_:))))
+        return view
+    }
+    func updateUIView(_ view: SCNView, context: Context) {
+        context.coordinator.select = select
+        view.isPlaying = active && view.window != nil; view.scene?.isPaused = !active || view.window == nil
+        let signature = businesses.map { "\($0.id):\($0.plot ?? -1):\($0.definitionID):\($0.level)" }.joined(separator: ",") + properties.map { "p\($0.id):\($0.renovations)" }.joined(separator: ",") + "\(reduced)"
+        if signature != context.coordinator.signature {
+            let oldRig = view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false)?.position
+            let oldZoom = view.pointOfView?.camera?.orthographicScale
+            view.scene = CitySceneBuilder.make(businesses, properties: properties, reduced: reduced)
+            view.pointOfView = view.scene?.rootNode.childNode(withName: "camera", recursively: true)
+            if let oldRig { view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false)?.position = oldRig }
+            if let oldZoom { view.pointOfView?.camera?.orthographicScale = oldZoom }
+            context.coordinator.signature = signature
+        }
+    }
+    static func dismantleUIView(_ uiView: SCNView, coordinator: Coordinator) { uiView.isPlaying = false; uiView.scene = nil }
+    @MainActor final class Coordinator: NSObject {
+        var select: (Int?, Int?, Int?) -> Void
+        var signature = ""
+        init(select: @escaping (Int?, Int?, Int?) -> Void) { self.select = select }
+        @objc func pan(_ gesture: UIPanGestureRecognizer) {
+            guard let view = gesture.view as? SCNView, let rig = view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false) else { return }
+            let t = gesture.translation(in: view); let scale = Float(view.pointOfView?.camera?.orthographicScale ?? 78) / 350
+            rig.position.x = max(-95, min(95, rig.position.x - Float(t.x + t.y * 0.5) * scale))
+            rig.position.z = max(-70, min(70, rig.position.z + Float(t.x * 0.5 - t.y) * scale))
+            gesture.setTranslation(.zero, in: view)
+        }
+        @objc func pinch(_ gesture: UIPinchGestureRecognizer) {
+            guard let view = gesture.view as? SCNView, let camera = view.pointOfView?.camera else { return }
+            camera.orthographicScale = max(16, min(125, camera.orthographicScale / Double(gesture.scale))); gesture.scale = 1
+        }
+        @objc func tap(_ gesture: UITapGestureRecognizer) {
+            guard let view = gesture.view as? SCNView else { return }
+            for hit in view.hitTest(gesture.location(in: view), options: nil) {
+                var node: SCNNode? = hit.node
+                while let current = node {
+                    if let name = current.name, name.hasPrefix("branch-"), let id = Int(name.dropFirst(7)) { select(id, nil, nil); return }
+                    if let name = current.name, name.hasPrefix("plot-"), let id = Int(name.dropFirst(5)) { select(nil, id, nil); return }
+                    if let name = current.name, name.hasPrefix("property-"), let id = Int(name.dropFirst(9)) { select(nil, nil, id); return }
+                    node = current.parent
+                }
+            }
+        }
+    }
+}
+
+@MainActor final class PausableCityView: SCNView {
+    override func didMoveToWindow() {
+        super.didMoveToWindow(); isPlaying = window != nil; scene?.isPaused = window == nil
     }
 }

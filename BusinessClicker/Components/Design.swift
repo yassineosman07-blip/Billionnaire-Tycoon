@@ -28,8 +28,8 @@ struct Metric: View {
     var body: some View { VStack(alignment: .leading, spacing: 10) { Label(label, systemImage: symbol).font(.caption).foregroundStyle(.secondary); Text(value).font(.system(.title3, design: .rounded, weight: .semibold)).minimumScaleFactor(0.5).lineLimit(1) }.frame(maxWidth: .infinity, alignment: .leading) }
 }
 struct ActionButton: View {
-    var title: String; var symbol: String = "arrow.right"; var action: () -> Void
-    var body: some View { Button(action: action) { Label(title, systemImage: symbol).font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).padding(14) }.buttonStyle(.plain).background(Palette.accent, in: RoundedRectangle(cornerRadius: 15)).foregroundStyle(.white) }
+    var title: String; var symbol: String = "arrow.right"; var accent: Color = Palette.mint; var action: () -> Void
+    var body: some View { Button(action: action) { Label(title, systemImage: symbol).font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).padding(14) }.buttonStyle(ArcadeButtonStyle(accent: accent)) }
 }
 struct IconBadge: View {
     var symbol: String; var color: Color = Palette.accent

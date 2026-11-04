@@ -1,0 +1,9 @@
+# Photographies d’articles — ressources encore nécessaires
+
+Le parcours de boutiques est implémenté, mais ses 32 photographies commerciales ne sont pas intégrées. L’accès à `commons.wikimedia.org` a répondu par un refus de politique réseau HTTP 403. Les domaines `commons.wikimedia.org` et `upload.wikimedia.org` ont été ajoutés au brouillon de configuration ; ils ne sont pas actifs dans cette instance. Aucun contenu tiers n’a été téléchargé sans provenance ou présenté comme une vraie photo.
+
+Le manifeste `BusinessClicker/Resources/media-manifest.json` recense les 32 visuels manquants. Il faut fournir des photographies dont l’article représenté correspond au catalogue (notamment Renault Clio IV et Porsche 911 Carrera type 991), autorisées pour distribution embarquée hors ligne. Pour chaque photographie : page source, auteur, licence, lien de licence, URL de téléchargement et confirmation de correspondance au produit. Pour les objets fictifs, choisir et décrire précisément un objet réel illustrable avant validation de sa photo.
+
+Après autorisation réseau et vérification éditoriale des ressources : renseigner le manifeste, puis exécuter `python3 scripts/import-photos.py` (Python 3 et Pillow), `python3 scripts/generate_project.py` et `python3 scripts/validate-assets.py --require-photos`. Le script garde la vérification HTTPS et refuse les ressources sans métadonnées. Les licences compatibles peuvent imposer des attributions ou des conditions de redistribution ; les conserver avec les photos optimisées et documenter les changements.
+
+L’interface affiche « Photographie indisponible » lorsqu’un fichier manque. Les intérieurs 3D sont des décors originaux, pas des photos de produits. Les portraits `Portraits.png` sont des illustrations originales générées pour le projet, dans un atlas de 36 portraits ; ils ne remplacent aucune photographie d’article.

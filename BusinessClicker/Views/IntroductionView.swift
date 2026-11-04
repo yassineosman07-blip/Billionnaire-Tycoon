@@ -17,7 +17,7 @@ struct IntroductionView: View {
             if page == 3 {
                 Panel("Votre nouveau départ") {
                     TextField("Prénom", text: $name).textFieldStyle(.roundedBorder).textContentType(.givenName)
-                    HStack { ForEach(["person.crop.circle.fill", "person.crop.square.fill", "person.circle.fill"], id: \.self) { icon in Button { avatar = icon } label: { Image(systemName: icon).font(.largeTitle).padding(12).foregroundStyle(avatar == icon ? Palette.mint : Palette.lavender.opacity(0.4)) }.accessibilityLabel("Portrait \(icon)") } }
+                    HStack { ForEach(["person.crop.circle.fill", "person.crop.square.fill", "person.circle.fill"], id: \.self) { icon in Button { avatar = icon } label: { Portrait(person: icon == "person.crop.square.fill" ? 20 : icon == "person.circle.fill" ? 24 : 33, size: 64).padding(4).overlay { if avatar == icon { RoundedRectangle(cornerRadius: 18).stroke(Palette.mint, lineWidth: 2) } } }.accessibilityLabel("Portrait \(icon)") } }
                 }
             }
             HStack(spacing: 6) { ForEach(0..<4) { i in Capsule().fill(i == page ? Palette.accent : Palette.surface).frame(width: i == page ? 30 : 8, height: 6) } }.padding(.vertical)

@@ -51,15 +51,16 @@ struct GameRoot: View {
             } else if !game.world.introComplete { IntroductionView() }
             else {
                 TabView {
-                    NavigationStack { HomeView() }.tabItem { Label("Accueil", systemImage: "square.grid.2x2.fill") }
-                    NavigationStack { EmpireView() }.tabItem { Label("Empire", systemImage: "building.2.fill") }
-                    NavigationStack { CityView() }.tabItem { Label("Carte", systemImage: "map.fill") }
-                    NavigationStack { LifeView() }.tabItem { Label("Vie", systemImage: "bubble.left.and.bubble.right.fill") }
-                    NavigationStack { PatrimonyView() }.tabItem { Label("Patrimoine", systemImage: "diamond.fill") }
+                    NavigationStack { HomeView().modifier(CharacterAccess()) }.tabItem { Label("Accueil", systemImage: "square.grid.2x2.fill") }
+                    NavigationStack { EmpireView().modifier(CharacterAccess()) }.tabItem { Label("Empire", systemImage: "building.2.fill") }
+                    NavigationStack { CityView().modifier(CharacterAccess()) }.tabItem { Label("Carte", systemImage: "map.fill") }
+                    NavigationStack { LifeView().modifier(CharacterAccess()) }.tabItem { Label("Vie", systemImage: "bubble.left.and.bubble.right.fill") }
+                    NavigationStack { PatrimonyView().modifier(CharacterAccess()) }.tabItem { Label("Patrimoine", systemImage: "diamond.fill") }
                 }.toolbarBackground(Palette.background, for: .tabBar)
             }
         }
         .environmentObject(game)
+        .buttonStyle(ArcadeButtonStyle())
         .transaction { transaction in
             if reduceMotion || game.world.settings.reducedMotion { transaction.animation = nil; transaction.disablesAnimations = true }
         }

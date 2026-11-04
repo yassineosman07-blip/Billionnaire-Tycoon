@@ -10,11 +10,11 @@ def add(key, text): objects.append(f'\t\t{uid(key)} = {{ {text} }};')
 app_sources = sorted(p for p in (root / 'BusinessClicker').rglob('*.swift') if 'Tests' not in p.parts and 'UITests' not in p.parts)
 unit_sources = sorted((root / 'BusinessClicker/Tests').rglob('*.swift'))
 ui_sources = sorted((root / 'BusinessClicker/UITests').rglob('*.swift'))
-resources = sorted(p for p in (root / 'BusinessClicker/Resources').iterdir() if p.suffix in ['.wav', '.xcassets', '.xcprivacy'])
+resources = sorted(p for p in (root / 'BusinessClicker/Resources').iterdir() if p.suffix in ['.wav', '.xcassets', '.xcprivacy', '.png', '.jpg', '.json'])
 all_files = app_sources + unit_sources + ui_sources + resources
 for p in all_files:
     path = p.relative_to(root).as_posix()
-    kind = {'swift': 'sourcecode.swift', 'wav': 'audio.wav', 'xcassets': 'folder.assetcatalog', 'xcprivacy': 'text.xml'}[p.suffix[1:]]
+    kind = {'swift': 'sourcecode.swift', 'wav': 'audio.wav', 'xcassets': 'folder.assetcatalog', 'xcprivacy': 'text.xml', 'png': 'image.png', 'jpg': 'image.jpeg', 'json': 'text.json'}[p.suffix[1:]]
     add(path, f'isa = PBXFileReference; lastKnownFileType = {kind}; path = {q(path)}; sourceTree = SOURCE_ROOT;')
     add(path + '-build', f'isa = PBXBuildFile; fileRef = {uid(path)};')
 products = [('app', 'BusinessClicker.app', 'wrapper.application'), ('unit', 'BusinessClickerTests.xctest', 'wrapper.cfbundle'), ('ui', 'BusinessClickerUITests.xctest', 'wrapper.cfbundle')]
@@ -40,7 +40,7 @@ for target, name, sources in [('app', 'BusinessClicker', app_sources), ('unit', 
             'LD_RUNPATH_SEARCH_PATHS': '$(inherited) @executable_path/Frameworks @loader_path/Frameworks'
         }
         if target == 'app':
-            settings.update({'INFOPLIST_KEY_CFBundleDisplayName': 'Business Clicker', 'INFOPLIST_KEY_UILaunchScreen_Generation': 'YES', 'INFOPLIST_KEY_UIApplicationSceneManifest_Generation': 'YES', 'INFOPLIST_KEY_UISupportedInterfaceOrientations': 'UIInterfaceOrientationPortrait', 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon', 'ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME': 'AccentColor', 'MARKETING_VERSION': '1.0', 'CURRENT_PROJECT_VERSION': '1', 'ENABLE_TESTABILITY': 'YES' if config == 'Debug' else 'NO', 'INFOPLIST_KEY_ITSAppUsesNonExemptEncryption': 'NO'})
+            settings.update({'INFOPLIST_KEY_CFBundleDisplayName': 'Business Clicker', 'INFOPLIST_KEY_UILaunchScreen_Generation': 'YES', 'INFOPLIST_KEY_UIApplicationSceneManifest_Generation': 'YES', 'INFOPLIST_KEY_UISupportedInterfaceOrientations': 'UIInterfaceOrientationPortrait', 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon', 'ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME': 'AccentColor', 'MARKETING_VERSION': '1.2', 'CURRENT_PROJECT_VERSION': '1', 'ENABLE_TESTABILITY': 'YES' if config == 'Debug' else 'NO', 'INFOPLIST_KEY_ITSAppUsesNonExemptEncryption': 'NO'})
         elif target == 'unit': settings.update({'BUNDLE_LOADER': '$(TEST_HOST)', 'TEST_HOST': '$(BUILT_PRODUCTS_DIR)/BusinessClicker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BusinessClicker'})
         else: settings['TEST_TARGET_NAME'] = 'BusinessClicker'
         add(target + '-' + config, 'isa = XCBuildConfiguration; buildSettings = {' + ''.join(f'{k} = {q(v)};' for k, v in settings.items()) + f'}}; name = {config};')

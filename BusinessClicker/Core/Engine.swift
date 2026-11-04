@@ -5,7 +5,7 @@ public enum Engine {
     public static let maximumBalance: Money = Decimal(string: "1000000000000000000000000000000")!
     public static func validate(_ w: World) throws {
         func unique(_ ids: [Int]) -> Bool { Set(ids).count == ids.count }
-        guard w.version == 1, (1...10_000_000).contains(w.day), (1000...Int.max - 10000).contains(w.nextID),
+        guard w.version == 2, (1...10_000_000).contains(w.day), (1000...Int.max - 10000).contains(w.nextID),
               !w.cash.isNaN, !w.debt.isNaN, w.cash >= 0, w.cash <= maximumBalance, w.debt >= 0, w.debt <= maximumBalance,
               !w.pendingStockCosts.isNaN, w.pendingStockCosts >= 0, w.pendingStockCosts <= maximumBalance,
               w.lastSimulated.timeIntervalSince1970.isFinite, w.lastSimulated.timeIntervalSince1970 >= 0,
@@ -17,7 +17,7 @@ public enum Engine {
               unique(w.products.map(\.id)), unique(w.properties.map(\.id)), unique(w.relationships.map(\.id)), unique(w.luxuries),
               w.ingredients.enumerated().allSatisfy({ $0.offset == $0.element.id }), w.products.enumerated().allSatisfy({ $0.offset == $0.element.id }), w.relationships.enumerated().allSatisfy({ $0.offset == $0.element.id }),
               unique(w.orders.map(\.id)), unique(w.messages.map(\.id)), unique(w.events.map(\.id)), unique(w.appointments.map(\.id)),
-              w.businesses.allSatisfy({ Catalog.businesses.indices.contains($0.id) && (1...100).contains($0.level) && (0...30).contains($0.employees) && (0...10).contains($0.training) && $0.reputation.isFinite && (0...100).contains($0.reputation) }),
+              w.businesses.allSatisfy({ Catalog.businesses.indices.contains($0.definitionID) && (1...100).contains($0.level) && (0...30).contains($0.employees) && (0...10).contains($0.training) && $0.reputation.isFinite && (0...100).contains($0.reputation) }),
               w.ingredients.allSatisfy({ (0..<4).contains($0.id) && (0...1000000).contains($0.quantity) && $0.unitCost > 0 && $0.unitCost <= 100 && $0.quality.isFinite && (0.5...1.5).contains($0.quality) }),
               w.products.allSatisfy({ (0..<2).contains($0.id) && $0.price >= 1 && $0.price <= 100 && $0.referencePrice > 0 && $0.referencePrice <= 100 && $0.popularity.isFinite && (0...5).contains($0.popularity) && $0.preparationMinutes > 0 && !$0.recipe.isEmpty && $0.recipe.allSatisfy { (0..<4).contains($0.key) && (1...10).contains($0.value) } }),
               w.orders.allSatisfy({ (0..<4).contains($0.ingredient) && (1...10000).contains($0.quantity) && $0.due >= 1 && Catalog.suppliers.indices.contains($0.supplier) && $0.cost >= 0 && $0.cost <= maximumBalance }),
@@ -29,6 +29,7 @@ public enum Engine {
               w.boosts.allSatisfy({ $0.factor.isFinite && (1...2).contains($0.factor) }),
               w.partner == nil || Catalog.people.indices.contains(w.partner!), (0...5).contains(w.children)
         else { throw GameError.invalid("Sauvegarde incohérente ou version non prise en charge. La sauvegarde n’a pas été écrasée.") }
+        try validateRevision(w)
         func amount(_ value: Money) -> Bool { !value.isNaN && value >= 0 && value <= maximumBalance }
         let ids = w.orders.map(\.id) + w.messages.map(\.id) + w.events.map(\.id) + w.appointments.map(\.id) + w.boosts.map(\.id) + w.sales.map(\.id)
         guard ids.allSatisfy({ $0 >= 0 && $0 <= w.nextID }), unique(ids),
@@ -58,7 +59,7 @@ public enum Engine {
         x = (x ^ (x >> 30)) &* 0xbf58476d1ce4e5b9; x = (x ^ (x >> 27)) &* 0x94d049bb133111eb
         return Double((x ^ (x >> 31)) >> 11) / 9007199254740992
     }
-    public static func upgradeCost(_ b: Business) -> Money { cents(Catalog.businesses[b.id].price * money(0.12 * pow(1.19, Double(b.level - 1)))) }
+    public static func upgradeCost(_ b: Business) -> Money { cents(Catalog.businesses[b.definitionID].price * money(0.12 * pow(1.19, Double(b.level - 1)))) }
     public static func renovationCost(_ p: Property) -> Money { cents(Catalog.properties[p.id].price * money(0.12 + Double(p.renovations) * 0.03)) }
     public static func marketRent(_ p: Property) -> Money { cents(Catalog.properties[p.id].marketRent * money(1 + Double(p.renovations) * 0.1)) }
     public static func recipeCost(_ product: Product, world: World) -> Money { product.recipe.reduce(0) { $0 + world.ingredients[$1.key].unitCost * Decimal($1.value) } }
@@ -72,10 +73,31 @@ public enum Engine {
         w.orders.append(Order(id: id, ingredient: ingredient, quantity: quantity, due: w.day + s.delay + late, cost: cost, supplier: supplier)); w.totalOrders += 1
     }
     public static func buyBusiness(_ w: inout World, id: Int) throws {
-        guard Catalog.businesses.indices.contains(id), !w.businesses.contains(where: { $0.id == id }) else { throw GameError.invalid("Entreprise déjà acquise ou inconnue.") }
-        let d = Catalog.businesses[id]
-        guard w.netWorth >= d.unlock, id < 32 || w.market > 0 else { throw GameError.locked }
-        try spend(d.price + Catalog.districts[d.district].installation, in: &w); w.businesses.append(Business(id: id))
+        _ = try openBusiness(&w, type: id, district: Catalog.businesses.indices.contains(id) ? Catalog.businesses[id].district : 0, name: nil)
+    }
+    @discardableResult public static func openBusiness(_ w: inout World, type: Int, district: Int, name: String?, plot requested: Int? = nil) throws -> Int {
+        guard Catalog.businesses.indices.contains(type), Catalog.districts.indices.contains(district) else { throw GameError.invalid("Activité ou quartier inconnu.") }
+        let definition = Catalog.businesses[type]
+        guard w.netWorth >= definition.unlock, w.netWorth >= Catalog.districts[district].unlock, type < 32 || w.market > 0 else { throw GameError.locked }
+        let available = availablePlots(w, district: district)
+        guard let plot = requested ?? available.first, available.contains(plot) else { throw GameError.invalid("Cette parcelle est indisponible.") }
+        let workingCapital = cents(definition.price * 0.05)
+        try spend(definition.price + Catalog.districts[district].installation + workingCapital, in: &w)
+        let identifier = w.businesses.contains(where: { $0.id == type }) ? w.identifier() : type
+        var business = Business(id: identifier); business.type = type; business.location = district; business.plot = plot
+        let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        business.customName = trimmed.isEmpty ? definition.name + " — " + Catalog.districts[district].name : String(trimmed.prefix(60))
+        w.businesses.append(business); return identifier
+    }
+    public static func availablePlots(_ w: World, district: Int) -> [Int] {
+        (district * 24..<(district + 1) * 24).filter { plot in !w.businesses.contains { $0.plot == plot } }
+    }
+    public static func configureBusiness(_ w: inout World, id: Int, name: String, multiplier: Double, opening: Int, closing: Int) throws {
+        guard let i = w.businesses.firstIndex(where: { $0.id == id }), multiplier.isFinite, (0.5...2).contains(multiplier), (0...23).contains(opening), (1...24).contains(closing), closing > opening else { throw GameError.invalid("Paramètres d’établissement invalides.") }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw GameError.invalid("Choisissez un nom.") }
+        w.businesses[i].customName = String(trimmed.prefix(60)); w.businesses[i].priceMultiplier = multiplier
+        w.businesses[i].openingHour = opening; w.businesses[i].closingHour = closing
     }
     public static func upgrade(_ w: inout World, id: Int) throws {
         guard let i = w.businesses.firstIndex(where: { $0.id == id }), w.businesses[i].level < 100 else { throw GameError.invalid("Niveau maximum ou entreprise inconnue.") }
@@ -123,12 +145,13 @@ public enum Engine {
         w.properties.remove(at: i)
     }
     public static func buyLuxury(_ w: inout World, id: Int) throws {
-        guard Catalog.luxuries.indices.contains(id), !w.luxuries.contains(id) else { throw GameError.invalid("Objet déjà dans la collection.") }
-        try spend(Catalog.luxuries[id].price, in: &w); w.luxuries.append(id)
+        guard let shop = ShopCatalog.shops.first(where: { $0.offers.contains(id) }) else { throw GameError.invalid("Article inconnu.") }
+        _ = try purchase(&w, item: id, shop: shop.id)
     }
     public static func interact(_ w: inout World, person: Int, activity: String) throws {
-        guard w.relationships.indices.contains(person), Catalog.people[person].unlockDay <= w.day, w.relationships[person].lastInteraction != w.day else { throw GameError.invalid("Cette personne est indisponible ou vous avez déjà partagé un moment aujourd’hui.") }
-        try spend(5, in: &w)
+        guard w.relationships.indices.contains(person), w.social.known.contains(person), w.relationships[person].lastInteraction != w.day else { throw GameError.invalid("Cette personne est indisponible ou vous avez déjà partagé un moment aujourd’hui.") }
+        guard actionsRemaining(w) > 0 else { throw GameError.invalid("Vos trois actions du jour sont utilisées ou réservées.") }
+        try spend(5, in: &w); useAction(&w)
         let bonus = Catalog.people[person].preference == activity ? 9 : 5
         w.relationships[person].trust = min(100, w.relationships[person].trust + 4)
         w.relationships[person].affinity = min(100, w.relationships[person].affinity + bonus)
@@ -141,12 +164,13 @@ public enum Engine {
         w.relationships[p].trust = min(100, w.relationships[p].trust + (warm ? 4 : 1))
     }
     public static func schedule(_ w: inout World, person: Int, inDays: Int, prepared: Bool) throws {
-        guard w.relationships.indices.contains(person), Catalog.people[person].unlockDay <= w.day, (1...30).contains(inDays), !w.appointments.contains(where: { !$0.resolved && $0.person == person && $0.day == w.day + inDays }) else { throw GameError.invalid("Rendez-vous invalide ou déjà programmé.") }
+        guard w.relationships.indices.contains(person), w.social.known.contains(person), (1...30).contains(inDays), !w.appointments.contains(where: { !$0.resolved && $0.person == person && $0.day == w.day + inDays }) else { throw GameError.invalid("Rendez-vous invalide ou déjà programmé.") }
+        guard reservations(w, day: w.day + inDays) < 3 else { throw GameError.invalid("Trois actions sont déjà réservées à cette date.") }
         if prepared { try spend(15, in: &w) }
         let id = w.identifier(); w.appointments.append(Appointment(id: id, person: person, day: w.day + inDays, prepared: prepared))
     }
     public static func family(_ w: inout World, person: Int) throws {
-        guard person >= 2, w.relationships.indices.contains(person), Catalog.people[person].unlockDay <= w.day else { throw GameError.locked }
+        guard w.relationships.indices.contains(person), (person >= 4 || w.social.legacyPeople != nil && person >= 2), !["Mère", "Père", "Frère"].contains(w.person(person).role), w.social.known.contains(person) else { throw GameError.locked }
         let r = w.relationships[person]
         guard r.affinity >= 70, r.trust >= 65, w.lastFamilyDay != w.day else { throw GameError.invalid("Développez d’abord une relation de confiance (65) et d’affinité (70). Une étape familiale par jour.") }
         if w.partner == nil { w.partner = person }
@@ -184,7 +208,7 @@ public enum Engine {
             switch w.events[i].definition?.category {
             case .investment: credit(500, in: &w); w.debt += 500
             case .family, .social, .culture:
-                let person = w.events[i].definition?.category == .family ? 0 : 2
+                let person = w.events[i].definition?.category == .family ? 0 : (w.social.known.filter { $0 >= 4 }.first ?? 2)
                 w.relationships[person].trust = min(100, w.relationships[person].trust + 5)
                 w.relationships[person].affinity = min(100, w.relationships[person].affinity + 5)
             default: break
@@ -222,16 +246,22 @@ public enum Engine {
                 try? order(&w, ingredient: i, quantity: count, supplier: w.supplier)
             }
         }
-        let stockPurchases = w.pendingStockCosts; costs += stockPurchases; w.pendingStockCosts = 0
+        var stockPurchases = w.pendingStockCosts; costs += stockPurchases; w.pendingStockCosts = 0
         let efficiency = offline ? w.offlineYield : 1
         let boost = min(2, w.boosts.filter { $0.until > day }.reduce(1.0) { $0 * $1.factor })
         for i in w.businesses.indices {
-            let b = w.businesses[i]; let d = Catalog.businesses[b.id]
-            let hours = Double(w.closing - w.opening)
-            let district = Catalog.districts[d.district]
+            if let due = w.businesses[i].supplyDay, due <= day {
+                w.businesses[i].stockUnits = min(1_000_000_000, (w.businesses[i].stockUnits ?? 40) + (w.businesses[i].supplyQuantity ?? 0))
+                w.businesses[i].supplyDay = nil; w.businesses[i].supplyQuantity = nil
+                notes.append("Livraison à \(w.businesses[i].name).")
+            }
+            let b = w.businesses[i]; let d = Catalog.businesses[b.definitionID]
+            let hours = Double((b.closingHour ?? w.closing) - (b.openingHour ?? w.opening))
+            let district = Catalog.districts[b.districtID]
             let productivity = (1 + Double(b.employees) * 0.14 + Double(b.training) * 0.04) * (b.manager ? 1.1 : 1)
             let growth = pow(1.14, Double(b.level - 1)) * w.synergy * (1 + Double(w.innovation) * 0.1) * (1 + Double(w.market) * 0.2)
             var earned: Money = 0
+            var branchStockCost: Money = b.id == 0 ? stockPurchases : 0
             if b.id == 0 {
                 var capacity = max(1, Int(hours * 60 * productivity * pow(1.025, Double(b.level - 1))))
                 for product in w.products where product.enabled {
@@ -244,14 +274,25 @@ public enum Engine {
                     customers += count; earned += product.price * Decimal(count) * money(efficiency)
                 }
             } else {
-                earned = d.revenue * money(growth * productivity * boost * efficiency * (0.9 + sample(seed: w.seed, day: day, salt: b.id + 50) * 0.2))
+                let localPeers = w.businesses.filter { $0.id != b.id && $0.definitionID == b.definitionID && $0.districtID == b.districtID }.count
+                let competition = 1 / (1 + Double(localPeers) * 0.18)
+                let price = b.priceMultiplier ?? 1
+                let demand = max(1, Int(30 * growth * productivity * boost * competition * (0.75 + district.popularity) * (1 - district.competition * 0.25) * hours / 8 * pow(price, -1.35)))
+                let stock = b.stockUnits ?? 40
+                if b.manager && stock < demand * 2 && b.supplyDay == nil {
+                    try? orderBusinessStock(&w, id: b.id, quantity: min(1_000_000_000, max(40, demand * 3)))
+                }
+                let count = min(stock, demand); w.businesses[i].stockUnits = stock - count
+                earned = d.revenue / 30 * Decimal(count) * money(price * efficiency)
+                branchStockCost = w.businesses[i].stockExpenses ?? 0; costs += branchStockCost; stockPurchases += branchStockCost; w.businesses[i].stockExpenses = 0
+
             }
             let operating = b.id == 0 ? money(8 + hours * 0.75) : d.costs * money(pow(1.09, Double(b.level - 1))) + district.rent
             let wages = Decimal(b.employees * 12 + (b.manager ? 18 : 0))
             earned = cents(earned)
             let expense = cents(operating + wages)
             revenue += earned; costs += expense; credit(earned, in: &w); bill(expense, in: &w)
-            w.businesses[i].lastRevenue = earned; w.businesses[i].lastCosts = expense
+            w.businesses[i].lastRevenue = earned; w.businesses[i].lastCosts = expense + branchStockCost
             w.businesses[i].reputation = min(100, max(0, b.reputation + (earned > expense ? 0.3 : -0.15)))
         }
         for i in w.properties.indices {
@@ -273,7 +314,7 @@ public enum Engine {
             let a = w.appointments[i]; let success = a.prepared || sample(seed: w.seed, day: day, salt: a.id) < 0.5
             w.relationships[a.person].trust = min(100, max(0, w.relationships[a.person].trust + (success ? 8 : -2)))
             w.relationships[a.person].affinity = min(100, w.relationships[a.person].affinity + (success ? 5 : 0))
-            w.appointments[i].resolved = true; notes.append("Rendez-vous avec \(Catalog.people[a.person].name) : \(success ? "une belle rencontre" : "à mieux préparer").")
+            w.appointments[i].resolved = true; notes.append("Rendez-vous avec \(w.personName(a.person)) : \(success ? "une belle rencontre" : "à mieux préparer").")
             let id = w.identifier(); w.messages.append(Message(id: id, person: a.person, day: day, text: success ? "Merci pour ce moment. On se revoit bientôt !" : "Reprenons le temps d’en discuter une autre fois."))
         }
         if day % 3 == 0 && w.events.filter({ !$0.resolved }).count < 12 {
@@ -288,7 +329,7 @@ public enum Engine {
         }
         if day % 5 == 0 {
             let p = min(Catalog.people.count - 1, day / 5); let id = w.identifier()
-            if Catalog.people[p].unlockDay <= day { w.messages.append(Message(id: id, person: p, day: day, text: "J’ai entendu parler de votre aventure. Et si nous prenions le temps d’échanger ?")) }
+            if w.social.known.contains(p) { w.messages.append(Message(id: id, person: p, day: day, text: "J’ai entendu parler de votre aventure. Et si nous prenions le temps d’échanger ?")) }
         }
         if customers >= 15 {
             let key = "daily-\(day)"

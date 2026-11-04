@@ -84,7 +84,7 @@ final class SimulationTests: XCTestCase {
         var w = rich(); try Engine.buyBusiness(&w, id: 9); XCTAssertEqual(w.synergy, 1.15, accuracy: 0.001)
         let before = w.cash; try Engine.upgrade(&w, id: 0); XCTAssertLessThan(w.cash, before); XCTAssertEqual(w.businesses[0].level, 2)
         w.businesses[0].level = 100; XCTAssertThrowsError(try Engine.upgrade(&w, id: 0))
-        XCTAssertThrowsError(try Engine.buyBusiness(&w, id: 9)); XCTAssertThrowsError(try Engine.buyBusiness(&w, id: 39))
+        try Engine.buyBusiness(&w, id: 9); XCTAssertEqual(w.businesses.filter { $0.definitionID == 9 }.count, 2); XCTAssertThrowsError(try Engine.buyBusiness(&w, id: 39))
         try Engine.expand(&w); try Engine.buyBusiness(&w, id: 39)
     }
     func testManagerOrdersAndPaysSalary() throws {
@@ -130,12 +130,12 @@ final class SimulationTests: XCTestCase {
         let trust = w.relationships[0].trust; try Engine.advance(&w); XCTAssertEqual(trust, w.relationships[0].trust)
     }
     func testFamilyRequiresTrustAndPersists() throws {
-        var w = rich(); XCTAssertThrowsError(try Engine.family(&w, person: 2))
-        w.relationships[2].trust = 80; w.relationships[2].affinity = 80
-        try Engine.family(&w, person: 2); XCTAssertEqual(w.partner, 2)
-        XCTAssertThrowsError(try Engine.family(&w, person: 2)); try Engine.advance(&w)
-        try Engine.family(&w, person: 2); XCTAssertTrue(w.married); try Engine.advance(&w)
-        try Engine.family(&w, person: 2); XCTAssertEqual(w.children, 1)
+        var w = rich(); w.social.known.append(5); XCTAssertThrowsError(try Engine.family(&w, person: 5))
+        w.relationships[5].trust = 80; w.relationships[5].affinity = 80
+        try Engine.family(&w, person: 5); XCTAssertEqual(w.partner, 5)
+        XCTAssertThrowsError(try Engine.family(&w, person: 5)); try Engine.advance(&w)
+        try Engine.family(&w, person: 5); XCTAssertTrue(w.married); try Engine.advance(&w)
+        try Engine.family(&w, person: 5); XCTAssertEqual(w.children, 1)
         XCTAssertEqual(try SaveCodec.decode(SaveCodec.encode(w)).children, 1)
     }
     func testEventAndGoalRewardsCannotRepeat() throws {
@@ -196,7 +196,7 @@ final class SimulationTests: XCTestCase {
         XCTAssertEqual(w.businesses.count, 2); XCTAssertGreaterThan(w.cash, 100); XCTAssertEqual(w.debt, 0)
     }
     func testEventEligibilityCooldownAndInvestmentDebt() throws {
-        var w = rich(); w.reputation = 50
+        var w = rich(); w.reputation = 50; w.social.known.append(4)
         let d = Catalog.story.first { $0.category == .investment }!
         XCTAssertTrue(d.eligible(w))
         let id = w.identifier(); w.events.append(StoryEvent(id: id, key: "template-\(d.id)", day: w.day, title: d.title, text: d.text))

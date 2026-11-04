@@ -20,12 +20,12 @@ import SwiftData
         do { world = try store.load() ?? World(); try store.save(world); feedback.apply(world.settings); refreshForecast() }
         catch { loadFailure = true; self.error = error.localizedDescription }
     }
-    func perform(sound: String = "purchase", _ action: (inout World) throws -> Void) {
-        guard !busy, !loadFailure else { return }
+    @discardableResult func perform(sound: String = "purchase", _ action: (inout World) throws -> Void) -> Bool {
+        guard !busy, !loadFailure else { return false }
         do {
             var copy = world; try action(&copy); try store.save(copy); world = copy
-            refreshForecast(); feedback.apply(copy.settings); feedback.play(sound, settings: copy.settings)
-        } catch { self.error = error.localizedDescription }
+            refreshForecast(); feedback.apply(copy.settings); feedback.play(sound, settings: copy.settings); return true
+        } catch { self.error = error.localizedDescription; feedback.play("error", settings: world.settings); return false }
     }
     func sync(offline: Bool) async {
         guard !busy, !loadFailure, world.introComplete else { return }
@@ -80,7 +80,7 @@ import SwiftData
         do { let allowed = try await feedback.notifications(enabled: enabled); setting(\.notifications, value: allowed); if enabled && !allowed { error = "Les notifications ne sont pas autorisées. Vous pouvez les activer dans Réglages iOS." } }
         catch { self.error = error.localizedDescription }
     }
-    func pause() { active = false; feedback.apply({ var s = world.settings; s.music = false; return s }()) }
+    func pause() { active = false; feedback.pause() }
     func resume() { active = true; feedback.apply(world.settings) }
     private func refreshForecast() {
         forecastGeneration += 1
@@ -93,5 +93,6 @@ import SwiftData
             if generation == forecastGeneration { forecast = estimate }
         }
     }
+    var portraitID: Int { world.avatar == "person.crop.square.fill" ? 20 : world.avatar == "person.circle.fill" ? 24 : 33 }
     func value(_ amount: Money) -> String { euros(amount, compact: world.settings.compactNumbers) }
 }

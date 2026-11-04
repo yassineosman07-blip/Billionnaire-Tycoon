@@ -34,18 +34,13 @@ struct PatrimonyView: View {
                 }
             } else {
                 Panel("Votre signature") {
-                    HStack { Metric(label: "Collection", value: "\(game.world.luxuries.count) objets", symbol: "diamond.fill"); Metric(label: "Statut social", value: "\(game.world.status)", symbol: "sparkles") }
-                    Text("Votre collection ouvre des horizons. La confiance de vos proches se construit dans vos échanges.").font(.caption).foregroundStyle(.secondary)
+                    HStack { Metric(label: "Collection", value: "\(game.world.collectionCount) objets", symbol: "diamond.fill"); Metric(label: "Statut social", value: "\(game.world.status)", symbol: "sparkles") }
+                    NavigationLink { ShoppingDistrictView() } label: { Label("Entrer dans le quartier des boutiques", systemImage: "storefront.fill") }
+                    NavigationLink { PersonalCollectionView() } label: { Label("Voir ma collection", systemImage: "diamond.fill") }
                 }
-                Picker("Catégorie", selection: $category) { Text("Toutes les catégories").tag("Tous"); ForEach(Array(Set(Catalog.luxuries.map(\.category))).sorted(), id: \.self) { Text($0).tag($0) } }
-                ForEach(Catalog.luxuries.filter { category == "Tous" || $0.category == category }) { item in
-                    Panel {
-                        HStack { IconBadge(symbol: item.symbol); VStack(alignment: .leading, spacing: 5) { Text(item.name).font(.headline); Text(item.category).font(.caption).foregroundStyle(.secondary) }; Spacer() }
-                        LineItem(label: "Valeur", value: game.value(item.price)); Text("Statut +\(item.status)").font(.caption).foregroundStyle(Palette.accent)
-                        if game.world.luxuries.contains(item.id) { Label("Dans votre collection", systemImage: "checkmark.seal.fill").foregroundStyle(Palette.mint) }
-                        else { Button("Acquérir") { game.perform(sound: "success") { try Engine.buyLuxury(&$0, id: item.id) } } }
-                    }
-                }
+                ForEach(ShopCatalog.categories) { category in NavigationLink { ShopCategoryView(category: category.id) } label: {
+                    HStack { IconBadge(symbol: category.symbol, color: .orange); Text(category.name).font(.headline); Spacer(); Image(systemName: "chevron.right") }.padding(14).background(Palette.surface, in: RoundedRectangle(cornerRadius: 18))
+                }.buttonStyle(.plain) }
             }
         }.navigationTitle("Votre patrimoine")
     }

@@ -7,7 +7,7 @@ public struct EventDefinition: Identifiable, Sendable {
     public var requiresProperty = false; public var minBusinesses = 1; public var minStatus = 0
     public var oneShot = false
     public func eligible(_ w: World) -> Bool {
-        w.reputation >= minReputation && w.netWorth >= minWorth && (!requiresProperty || !w.properties.isEmpty) && w.businesses.count >= minBusinesses && w.status >= minStatus
+        (category != .investment || w.social.known.contains(4)) && w.reputation >= minReputation && w.netWorth >= minWorth && (!requiresProperty || !w.properties.isEmpty) && w.businesses.count >= minBusinesses && w.status >= minStatus
     }
 }
 extension Catalog {

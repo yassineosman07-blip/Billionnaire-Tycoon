@@ -1,93 +1,64 @@
-# Business Clicker
+# Business Clicker — refonte 1.2
 
-Jeu iPhone hors connexion, en français, basé sur le [cahier des charges](docs/CAHIER_DES_CHARGES.md). Projet natif **iOS 17+**, **Swift / SwiftUI**, architecture **MVVM**, **SwiftData**, **SpriteKit**, **Charts**, **AVFoundation** et retours haptiques UIKit. Aucun service distant, compte, publicité, achat intégré ou dépendance applicative externe.
+Jeu iPhone natif en français, iOS 17+, SwiftUI / MVVM, SceneKit, SpriteKit, SwiftData, Swift Charts et AVFoundation. Aucun compte, serveur, publicité ou achat intégré. Les règles de la cible figurent dans le [cahier des charges 1.2](docs/CAHIER_DES_CHARGES.md).
 
-## Ouvrir et jouer
+**État de livraison :** les fonctionnalités ci-dessous sont implémentées et le moteur est testé sous Linux. La compilation et le rendu iOS doivent encore être vérifiés dans Xcode sur Mac. **Les 32 photographies commerciales restent à intégrer** ; les emplacements manquants affichent explicitement « Photographie indisponible ». Voir [la validation](docs/VALIDATION.md) et [les ressources photographiques manquantes](docs/media/PHOTOGRAPHS.md).
 
-1. Sur Mac, ouvrir **`BusinessClicker.xcodeproj`** avec Xcode 16 ou ultérieur.
-2. Choisir le schéma partagé **BusinessClicker**, puis un simulateur iPhone sous iOS 17 ou ultérieur.
-3. Lancer avec **⌘R**. Sur un iPhone physique, sélectionner votre équipe dans *Signing & Capabilities* ; aucun identifiant d’équipe n’est imposé dans le dépôt.
-4. Exécuter **⌘U** pour les tests du moteur, de SwiftData et le parcours UI.
+## Ouvrir le projet
 
-L’interface iOS et SwiftData n’ont pas pu être compilés ou exécutés sur la machine Linux utilisée pour cette livraison. Leur syntaxe et les références du projet ont été vérifiées ; la validation Apple reste à effectuer. Voir [les vérifications et leurs limites](docs/VALIDATION.md).
+Sur Mac avec Xcode 16 ou ultérieur, ouvrir **BusinessClicker.xcodeproj**, choisir le schéma partagé **BusinessClicker** et un simulateur iPhone iOS 17+. Lancer avec **⌘R**, tester avec **⌘U**. Pour un appareil physique, sélectionner votre équipe dans Signing & Capabilities ; aucune équipe n’est imposée dans le dépôt.
+
+```sh
+xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker \
+  -destination 'platform=iOS Simulator,name=iPhone 16' \
+  -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO
+```
+
+Adapter le simulateur à ceux listés par `xcrun simctl list devices available`. Les tests UI utilisent une sauvegarde Debug distincte de la partie normale.
+
+## Ce qui change dans cette version
+
+- **Établissements multiples.** Quarante types d’activités, plusieurs instances du même type et consolidation par enseigne. Chaque adresse a son nom, son quartier, sa parcelle, son niveau, son équipe, son manager, son tarif, ses horaires et sa réserve. Les cafés voisins se partagent une partie de la demande. Les synergies ne se multiplient pas par le nombre de copies.
+- **Ville 3D SceneKit.** Cinq quartiers, 120 parcelles économiques et 16 emplacements immobiliers. Façades pastel, vitrines, auvents, food truck, routes, passages piétons, trottoirs, arbres, lampadaires, ombres et voitures décoratives. Glisser pour déplacer la caméra, pincer pour zoomer et toucher une adresse pour ouvrir sa fiche. Les parcelles occupées ne peuvent pas être achetées deux fois. La géométrie est originale et procédurale ; le rendu exact demande une revue sur iPhone.
+- **Boutiques.** Dix catégories, deux enseignes par catégorie et 32 articles, avec des assortiments différenciés. Entrée dans un intérieur 3D, vitrines ou présentations sélectionnables, fiche article, prix, confirmation, puis collection. Les pièces uniques ne peuvent pas être rachetées dans une autre enseigne ; plusieurs véhicules ou logements personnels peuvent être possédés avec des identifiants distincts. Le statut d’un même modèle n’est pas crédité plusieurs fois.
+- **Personnage.** Icône de portrait en haut à gauche des cinq écrans principaux, fiche statistique, finances, réputation, patrimoine, contacts, situation familiale et compteur d’actions. Les 36 portraits sont des illustrations originales de style 3D cartoon, conservées dans un atlas local.
+- **Entourage initial.** Pour les nouvelles parties : mère, père, frère et ex-femme uniquement. Les autres contacts arrivent après des rencontres, jamais automatiquement à une date de déblocage. Les parties migrées conservent leurs anciennes identités et leurs contacts effectivement accessibles ou déjà référencés.
+- **Actions.** Vie → Actions ou raccourci depuis Personnage. Un site de rencontre fictif hors ligne et une sortie au bar partagent trois actions par journée simulée. Une tentative sans événement consomme aussi son point. Les interactions directes utilisent la même réserve ; les rendez-vous réservent un point à leur date. Aucun cumul des points inutilisés et aucune sortie exécutée automatiquement pendant l’absence.
+- **Événements probabilistes.** Une nouvelle connaissance, une conversation, un investisseur potentiel, une trouvaille de 100 €, une opportunité ou rien. Les résultats sont sauvegardés avec l’action ; redémarrer ne relance pas le tirage et ne recrédite pas le gain. Rencontrer Sofia ne verse aucun financement : une proposition ultérieure et son acceptation restent nécessaires. Les catégories sans résultat éligible deviennent une tentative sans événement.
+- **Boutons et sensations.** Cadres biseautés à coins coupés, double bordure lumineuse, états pressé/désactivé, couleurs d’action et zones tactiles de 44 points minimum. Variations de clics, sons d’achat, succès, entrée et refus, haptiques distincts, dix ambiances de boutiques et volumes indépendants. Le mode silencieux est respecté. Les effets sonores et visuels sont désactivables.
 
 ## Première partie
 
-Après quatre écrans d’introduction, personnalisez votre prénom et votre portrait. Vous possédez Tasty Crousty, un petit logement narratif, des stocks de départ et **100 €**, sans dette d’acquisition.
+L’introduction conserve le départ de Tasty Crousty : 100 €, food truck déjà payé, logement narratif et stocks de départ. Le clic sur les billets termine une journée ; il ne distribue pas directement d’argent.
 
-- **Accueil** : la pile de billets et « Passer au lendemain » terminent le service. Le clic simule l’économie ; il ne distribue pas directement d’argent. L’estimation du prochain bénéfice utilise une copie du moteur, hors du thread principal.
-- **Empire → Tasty Crousty** : choisissez les plats actifs, leurs prix et les horaires. Commandez des ingrédients avant la rupture. Le Marché local livre le lendemain : une commande passée au jour 1 est disponible au début du service du jour 2.
-- Le menu comprend deux recettes utilisant quatre ingrédients, trois fournisseurs et leurs contraintes de prix, qualité, minimum, délai et fiabilité. Une commande est payée immédiatement et comptabilisée une seule fois dans le prochain bilan.
-- Recrutez des employés, formez-les et engagez un manager. Le manager du food truck commande les stocks manquants s’il dispose des fonds nécessaires ; les autres managers améliorent la productivité. Les prix et horaires restent sous contrôle du joueur.
-- Une avance de secours de 40 €, une fois par journée sous 20 € de trésorerie, permet de financer le redémarrage. Cette somme devient une dette remboursable dans Finances.
-- **Carte** : déplacez la carte dans les deux axes, réglez son zoom et sélectionnez un des cinq quartiers. Les entreprises possédées et leur niveau modifient les bâtiments. Les fiches permettent les acquisitions et la gestion.
-- **Patrimoine** : achetez des biens, fixez leurs loyers et suivez l’occupation. Les rénovations coûtent de l’argent et plusieurs jours ; les avantages sont appliqués une fois les travaux terminés. La revente conserve un bilan complet et prélève 5 % de frais.
-- **Vie** : développez la confiance et l’affinité de vos contacts, répondez aux messages et préparez des rendez-vous. Les liens peuvent évoluer vers un couple, un mariage puis une famille ; les étapes sont conditionnées et génèrent des charges.
-- **Objectifs** : récupérez les récompenses permanentes. Une mission quotidienne verse automatiquement 10 € pour 15 clients servis.
+Dans **Empire → Tasty Crousty**, régler le menu, les prix et les horaires, puis commander les quatre ingrédients auprès des trois fournisseurs. Une commande du Marché local passée au jour 1 arrive au début du service du jour 2. Les autres établissements utilisent chacun leur réserve de fournitures, commandable dans leur propre fiche. Un manager commande automatiquement lorsque les stocks deviennent insuffisants et que les fonds le permettent.
 
-## Contenu et règles
+Dans Empire, **Ouvrir une nouvelle adresse** reste disponible pour une activité déjà possédée. Le parcours affiche acquisition, installation, fonds de roulement, parcelle et solde restant avant confirmation. L’ouverture fait apparaître le bâtiment correspondant dans la ville.
 
-- **40 entreprises**, niveau 1 à 100, dans 17 secteurs ; équipements et productivité progressent exponentiellement. Synergies de secteurs automatiques, recherche permanente et trois expansions internationales prolongent la progression. Aucun prestige.
-- **16 propriétés**, huit types, cinq niveaux de rénovation, location, vacance, entretien et revente.
-- **36 personnages** avec rôles, traits, préférences, humeur, confiance et affinité ; rencontres débloquées progressivement.
-- **12 objets personnels** dans onze catégories, dont logements, véhicules, art, bijoux, yachts et jets. Leur statut ouvre certains événements, sans acheter l’affection.
-- **24 événements écrits** avec conditions de richesse, réputation, collection, entreprises ou immobilier. Délais de réapparition de 45 jours et financement unique. Les conséquences proposées sont explicites avant le choix.
-- Sons, courte ambiance musicale en boucle, icône et illustrations géométriques créés localement ; les pictogrammes utilisent les SF Symbols du système. Pas de ressources téléchargées ni de marques commerciales réelles.
+Les propriétés locatives conservent les loyers réglables, la vacance, les charges, cinq rénovations différées et la revente avec bilan complet et frais de 5 %. Elles sont distinctes des logements personnels vendus en boutique.
 
-**Temps** : une journée toutes les 30 minutes réelles. Le moteur rattrape l’intervalle réel avant une avance manuelle, puis recale son horodatage pour éviter les doublons. Les fractions d’intervalle sont conservées en mode automatique. Un recul de l’horloge ne produit pas de journées supplémentaires.
+## Temps, finances et sauvegarde
 
-**Absence** : même pipeline de simulation, par lots de 365 jours exécutés en arrière-plan. Le rendement des ventes et loyers est de 50 % ; les charges et stocks consommés restent entiers. Les livraisons, travaux et rendez-vous sont traités aux dates prévues. Le taux est configurable dans `World.offlineYield`.
+Une journée correspond à 30 minutes réelles. La simulation hors ligne utilise le même moteur avec un rendement de 50 % sur ventes et loyers, sans réduire les charges ni les stocks consommés. Le passage manuel règle le temps réel écoulé puis recale l’horodatage pour éviter les doublons. Une horloge reculée ne crée pas de revenu.
 
-**Comptabilité** : montants ordinaires en `Decimal`, flux arrondis au centime. Les achats de stocks sont enregistrés au paiement puis rattachés au bilan du service sans seconde déduction. Les investissements et préparatifs sont distincts de la variation de trésorerie pendant la simulation. Les impayés deviennent des dettes. Fenêtre financière de 730 journées, compteurs de carrière conservés. Pour protéger les opérations, les comptes sont bornés à 10³⁰ € et le calendrier à dix millions de jours. `Magnitude` fournit séparément une représentation mantisse/exposant ; les comptes ne sont donc pas présentés comme arbitrairement infinis.
+Les comptes utilisent `Decimal`, avec arrondi au centime pour les flux. Les fournitures sont payées à la commande puis rattachées au bilan sans deuxième débit. Les dépenses d’investissement sont distinctes de la variation pendant la simulation. L’historique financier garde 730 journées et les compteurs de carrière restent conservés. Les comptes sont bornés à 10³⁰ € ; `Magnitude` fournit séparément une notation mantisse/exposant. Une avance de secours de 40 € par journée sous 20 € de trésorerie devient une dette remboursable depuis Finances.
 
-**Sauvegarde** : un état `World` Codable validé dans un modèle SwiftData versionné, plus la copie précédente. Chaque action est appliquée à une copie, enregistrée, puis publiée à l’interface : une erreur de sauvegarde n’affiche pas un état non enregistré. Un chargement invalide n’écrase pas les données ; l’écran propose une récupération ou un recommencement avec confirmation. La première version du schéma est enregistrée ; toute évolution nécessitera une migration explicite du schéma et/ou du payload.
+Le payload de sauvegarde passe en version 2 ; le modèle physique SwiftData reste compatible. Le décodeur migre les anciennes instances vers des parcelles distinctes, garde les identités antérieures des contacts, les relations et les montants exacts, sans conversion des finances via `Double`. Une action est appliquée à une copie, enregistrée, puis publiée à l’interface. Une copie précédente sert à la récupération ; une erreur ne réinitialise pas la partie sans confirmation.
 
-## Architecture et tests
-
-```text
-BusinessClicker/
-  App/            Point d’entrée et cycle de vie iOS
-  Core/           Modèles Codable, catalogue, événements, moteur, validation
-  Models/         Modèle et stockage SwiftData versionnés
-  ViewModels/     État observable, commandes, transactions et simulation asynchrone
-  Views/          Accueil, Empire, Carte, Vie, Patrimoine et écrans secondaires
-  Components/     Palette, cartes, composants et scène SpriteKit
-  Services/       Audio, haptiques et notifications facultatives
-  Resources/      Icône, couleurs, sons, musique et manifeste de confidentialité
-  Tests/          Tests portables et tests SwiftData spécifiques iOS
-  UITests/        Parcours iPhone de première partie et réouverture
-```
-
-Le moteur ne dépend d’aucun framework Apple d’interface. Avec Swift 6 installé :
+## Développement et validation
 
 ```sh
+# Swift 6 installé :
 swift test --jobs 4
-```
-
-Ou, dans cet environnement Linux avec le démon Docker géré :
-
-```sh
+# Ou conteneur Swift officiel épinglé, dans cet environnement Linux :
 ./scripts/test-core.sh
 python3 scripts/validate-assets.py
+# Contrôle strict des photographies, actuellement bloqué par les ressources manquantes :
+python3 scripts/validate-assets.py --require-photos
 ```
 
-Le script utilise une image Swift officielle épinglée par digest. L’accès au socket Docker peut nécessiter l’escalade du bac à sable de l’outil d’exécution. Il n’installe pas Xcode. Le projet ne nécessite aucun secret. Les tâches cloud utilisent le checkout existant ; aucun worktree supplémentaire n’est nécessaire.
+L’accès au démon Docker géré peut demander l’escalade du bac à sable de l’outil d’exécution. Le moteur ne dépend d’aucun framework graphique Apple. Les scènes 3D sont dans `Services/City/`, les règles révisées dans `Core/Social.swift` et `Core/Shops.swift`, les écrans dans `Views/` et les composants dans `Components/ArcadeUI.swift`.
 
-Le projet Xcode est livré et reproductible : `python3 scripts/generate_project.py`. Cette commande réécrit le projet et le schéma ; conservez d’abord toute personnalisation Xcode. Le pipeline `.github/workflows/validate.yml` prévoit les tests Swift sous Linux et `xcodebuild test` sur macOS. Il n’a pas été exécuté à distance pendant cette mission.
+Le projet Xcode est livré et peut être régénéré avec `python3 scripts/generate_project.py`. Cette commande remplace le projet et le schéma ; préserver toute personnalisation avant usage. La configuration CI prévoit Swift sous Linux et `xcodebuild test` sur macOS. Les tâches cloud utilisent le checkout existant, sans worktree supplémentaire.
 
-## Validation sur Mac
-
-Après sélection d’un simulateur installé :
-
-```sh
-xcodebuild test \
-  -project BusinessClicker.xcodeproj \
-  -scheme BusinessClicker \
-  -destination 'platform=iOS Simulator,name=iPhone 16' \
-  -parallel-testing-enabled NO \
-  CODE_SIGNING_ALLOWED=NO
-```
-
-Adaptez le nom à `xcrun simctl list devices available`. Vérifiez également le rendu avec les grandes tailles de texte, la permission de notifications, les haptiques, le mode silencieux et une réouverture après 30 minutes. Ces contrôles matériels et d’interface ne sont pas remplacés par les tests du moteur.
-
-Les valeurs économiques, la profondeur narrative et le rythme de fin de jeu demandent une phase de jeu sur appareil. La carte est une représentation stylisée de ville et les portraits sont des pictogrammes ; les variations familiales restent narratives et ne constituent pas une simulation individuelle de chaque enfant.
+La revue iPhone doit couvrir la compilation avec les frameworks Apple, le rendu et les performances de SceneKit, les grandes tailles de texte, VoiceOver, la synchronisation sonore, les notifications, les haptiques et la réouverture réelle. Les tests du moteur ne certifient pas ces points. Les prix du jeu et le rythme de progression restent à équilibrer par des sessions de jeu.

@@ -42,14 +42,27 @@ public enum Catalog {
         }
     }()
     public static let luxuries: [Luxury] = {
-        let rows = [("Veste Atelier", "Vêtements", "tshirt.fill"), ("Montre Orbe", "Montres", "clock.fill"), ("Moto Sillage", "Motos", "bicycle"), ("Citadine Alba", "Voitures", "car.fill"), ("Bague Aster", "Bijoux", "circle.hexagongrid.fill"), ("Loft personnel", "Logements", "house.fill"), ("Sculpture Élan", "Art", "paintpalette.fill"), ("Roadster Vela", "Voitures", "car.side.fill"), ("Collection numismatique", "Collections", "seal.fill"), ("Villa personnelle", "Maisons", "house.lodge.fill"), ("Yacht Ondine", "Yachts", "sailboat.fill"), ("Jet Altitude", "Jets", "airplane")]
-        return rows.enumerated().map { i, row in Luxury(id: i, name: row.0, category: row.1, symbol: row.2, price: money(150 * pow(3.5, Double(i))), status: i + 1) }
+        let rows = [("Veste Atelier", "Vêtements", "tshirt.fill"), ("Montre Orbe", "Montres", "clock.fill"), ("Moto Sillage", "Motos", "bicycle"), ("Renault Clio IV", "Voitures", "car.fill"), ("Bague Aster", "Bijoux", "circle.hexagongrid.fill"), ("Loft personnel", "Logements", "house.fill"), ("Sculpture Élan", "Art", "paintpalette.fill"), ("Porsche 911 Carrera (991)", "Voitures", "car.side.fill"), ("Collection numismatique", "Collections", "seal.fill"), ("Villa personnelle", "Maisons", "house.lodge.fill"), ("Yacht Ondine", "Yachts", "sailboat.fill"), ("Jet Altitude", "Jets", "airplane")]
+        let base = rows.enumerated().map { i, row in Luxury(id: i, name: row.0, category: row.1, symbol: row.2, price: money(150 * pow(3.5, Double(i))), status: i + 1) }
+        let additions: [(String, String, String, Double)] = [
+            ("Peugeot 208 II", "Voitures", "car.fill", 21000), ("Porsche Taycan", "Voitures", "car.fill", 125000),
+            ("Yamaha MT-07", "Motos", "motorcycle.fill", 8000), ("BMW R 1250 GS", "Motos", "motorcycle.fill", 19000),
+            ("Collier en or rose", "Bijoux", "diamond.fill", 1700), ("Bracelet de diamants", "Bijoux", "diamond.fill", 14500),
+            ("Seiko 5 Sports", "Montres", "clock.fill", 350), ("Omega Seamaster Diver 300M", "Montres", "clock.fill", 6200),
+            ("Blouson en cuir", "Vêtements", "tshirt.fill", 350), ("Costume en laine", "Vêtements", "tshirt.fill", 950),
+            ("Appartement de ville", "Logements", "house.fill", 180000), ("Maison d’architecte", "Maisons", "house.fill", 650000),
+            ("Photographie d’art encadrée", "Art", "paintpalette.fill", 450), ("Sculpture en bronze", "Art", "paintpalette.fill", 14000),
+            ("Collection de minéraux", "Collections", "seal.fill", 180), ("Collection de vinyles", "Collections", "seal.fill", 1200),
+            ("Beneteau Oceanis 30.1", "Yachts", "sailboat.fill", 190000), ("Azimut Atlantis 45", "Yachts", "sailboat.fill", 950000),
+            ("Cessna 172 Skyhawk", "Jets", "airplane", 250000), ("Embraer Phenom 300E", "Jets", "airplane", 11000000)
+        ]
+        return base + additions.enumerated().map { i, row in Luxury(id: 12+i, name: row.0, category: row.1, symbol: row.2, price: money(row.3), status: 3 + i / 2) }
     }()
     public static let people: [PersonDefinition] = {
-        let names = ["Marie", "Karim", "Lina", "Jules", "Sofia", "Hugo", "Camille", "Nora", "Adam", "Inès", "Louis", "Maya", "Gabriel", "Sarah", "Émile", "Jade", "Noah", "Alice", "Amir", "Chloé", "Paul", "Yasmine", "Lucas", "Rose", "Elias", "Eva", "Arthur", "Lou", "Rayan", "Zoé", "Oscar", "Mila", "Victor", "Anna", "Sami", "Clara"]
+        let names = ["Marie", "Karim", "Nassim", "Lina", "Sofia", "Hugo", "Camille", "Noé", "Inès", "Adam", "Alice", "Louis", "Maya", "Gabriel", "Sarah", "Émile", "Arthur", "Jade", "Amir", "Chloé", "Noah", "Rose", "Lucas", "Eva", "Victor", "Anna", "Oscar", "Yasmine", "Elias", "Zoé", "Clara", "Sami", "Lou", "Rayan", "Mila", "Paul"]
         let roles = ["Mère", "Père", "Amie d’enfance", "Chef cuisinier", "Investisseuse", "Voisin", "Artiste", "Architecte", "Livreur", "Journaliste", "Concurrent", "Partenaire potentielle"]
         let traits = ["Bienveillant", "Pragmatique", "Créatif", "Ambitieux", "Réservé", "Curieux"]
         let preferences = ["Repas", "Culture", "Sport", "Affaires"]
-        return names.enumerated().map { i, name in PersonDefinition(id: i, name: name, role: roles[i % 12], personality: traits[i % 6], preference: preferences[i % 4], symbol: ["person.fill", "person.crop.square.fill", "person.circle.fill"][i % 3], unlockDay: i < 4 ? 1 : i * 2) }
+        return names.enumerated().map { i, name in PersonDefinition(id: i, name: name, role: i == 2 ? "Frère" : (i == 3 ? "Ex-femme" : (i < 2 ? roles[i] : (i == 4 ? "Investisseuse" : ["Connaissance", "Chef cuisinier", "Artiste", "Architecte", "Livreur", "Journaliste", "Concurrent", "Entrepreneur"][i % 8]))), personality: traits[i % 6], preference: preferences[i % 4], symbol: ["person.fill", "person.crop.square.fill", "person.circle.fill"][i % 3], unlockDay: i < 4 ? 1 : i * 2) }
     }()
 }

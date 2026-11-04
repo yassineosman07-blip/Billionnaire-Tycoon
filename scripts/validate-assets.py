@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Validate packaged assets and shared Xcode scheme without Apple tooling."""
-import json, plistlib, struct, wave, xml.etree.ElementTree as ET
+import json, plistlib, struct, wave, sys, xml.etree.ElementTree as ET
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 resources = root / 'BusinessClicker/Resources'
@@ -24,3 +24,14 @@ for reference in scheme.findall('.//BuildableReference'):
 for path in (root / 'BusinessClicker').rglob('*.swift'):
     assert str(path.relative_to(root)) in project, f'Missing Xcode reference: {path}'
 print('Assets, audio, privacy manifest, shared scheme and source membership: OK')
+
+portraits = (resources / 'Portraits.png').read_bytes()
+assert portraits[:8] == b'\x89PNG\r\n\x1a\n'
+width, height = struct.unpack('>II', portraits[16:24]); assert width == height and width >= 1024
+assert 'BusinessClicker/Resources/Portraits.png' in project
+manifest = json.loads((resources / 'media-manifest.json').read_text())
+missing = [item for item in manifest['articles'] if item['status'] != 'ready' or not item['verified_product_match'] or not (resources / item['filename']).is_file()]
+print(f"Portrait atlas: {width}×{height}, 36 cells. Commercial photographs: {len(manifest['articles']) - len(missing)}/{len(manifest['articles'])} ready.")
+if '--require-photos' in sys.argv and missing:
+    print('Release media check blocked: authorized article photographs are missing.', file=sys.stderr)
+    sys.exit(1)
