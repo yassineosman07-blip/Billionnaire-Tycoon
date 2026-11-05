@@ -18,7 +18,7 @@ for path in models:
             for reference in material.read_text().splitlines():
                 if reference.startswith('map_Kd '):assert (city/reference[7:].strip()).is_file(), reference
 ns={'c':'http://www.collada.org/2005/11/COLLADASchema'}
-characters=assets/'Pedestrians'
+characters=root/'BusinessClicker/Resources/Pedestrians.scnassets'
 for skin in ['male','female']:
     for action in ['idle','run']:
         path=characters/f'{skin}-{action}.dae';tree=E.parse(path)
@@ -37,6 +37,8 @@ for skin in ['male','female']:
             assert image.text in ['humanMaleA.png','humanFemaleA.png']
             assert (characters/image.text).is_file()
         assert '/tmp/' not in path.read_text()
-assert not any('zombie' in str(p).lower() for p in assets.rglob('*'))
+assert not any('zombie' in str(p).lower() for directory in [assets,characters] for p in directory.rglob('*'))
 assert (city/'License.txt').is_file() and (characters/'License.txt').is_file()
+project=(root/'BusinessClicker.xcodeproj/project.pbxproj').read_text()
+assert 'wrapper.scnassets' in project and 'Pedestrians.scnassets' in project
 print('Kenney: 41 OBJ models + materials, CC0 provenance, 4 animated human rigs (58 joints), textures and zombie exclusion: OK')

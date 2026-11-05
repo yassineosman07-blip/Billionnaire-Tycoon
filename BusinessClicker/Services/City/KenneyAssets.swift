@@ -17,7 +17,8 @@ import UIKit
     }
     private static var buildings: [String: SCNNode] = [:]
     static func url(_ filename: String, folder: String) throws -> URL {
-        guard let url = Bundle.main.resourceURL?.appendingPathComponent("Kenney/\(folder)/\(filename)"), FileManager.default.fileExists(atPath: url.path) else { throw AssetError.missing("\(folder)/\(filename)") }
+        let resourcePath = folder == "Pedestrians" ? "Pedestrians.scnassets/\(filename)" : "Kenney/\(folder)/\(filename)"
+        guard let url = Bundle.main.resourceURL?.appendingPathComponent(resourcePath), FileManager.default.fileExists(atPath: url.path) else { throw AssetError.missing("\(folder)/\(filename)") }
         return url
     }
     static func buildingName(type: Int, level: Int, seed: Int) -> String {

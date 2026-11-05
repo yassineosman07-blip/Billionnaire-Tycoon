@@ -6,7 +6,7 @@ import bpy, ctypes, ctypes.util, tempfile, zipfile, xml.etree.ElementTree as ET,
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'BusinessClicker/Resources/Kenney/Pedestrians'
+OUT = ROOT / 'BusinessClicker/Resources/Pedestrians.scnassets'
 ARCHIVE = ROOT / 'AssetsSource/Kenney/kenney_animated-characters-retro.zip'
 libpath = ctypes.util.find_library('assimp')
 if not libpath: raise RuntimeError('Install libassimp before conversion.')
