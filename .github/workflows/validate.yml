@@ -1,5 +1,8 @@
 name: Validate Business Clicker
 on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   core:
     runs-on: ubuntu-latest
@@ -8,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: swift test --jobs 4
   ios:
-    runs-on: macos-15
+    runs-on: macos-15-intel
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
