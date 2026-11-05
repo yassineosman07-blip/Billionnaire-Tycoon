@@ -30,12 +30,20 @@ jobs:
           BUILD_STATUS=${PIPESTATUS[0]}
           python3 .github/scripts/report-xcode-errors.py Validation/build.log
           exit "$BUILD_STATUS"
+      - name: Package compiled simulator app
+        if: always() && steps.build.outcome == 'success'
+        run: ditto -c -k --keepParent DerivedData/Build/Products/Debug-iphonesimulator/BusinessClicker.app Validation/BusinessClicker-Simulator.zip
+      - name: Preserve compiled simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: BusinessClicker-Simulator-Intel
+          path: Validation/BusinessClicker-Simulator.zip
       - name: Test simulation, persistence and native 3D assets
         shell: bash
         run: |
           set +e
           set -o pipefail
-          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerTests -parallel-testing-enabled NO -resultBundlePath Validation/UnitTests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/unit-tests.log
+          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerTests -test-timeouts-enabled YES -default-test-execution-time-allowance 90 -maximum-test-execution-time-allowance 120 -parallel-testing-enabled NO -resultBundlePath Validation/UnitTests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/unit-tests.log | python3 -u .github/scripts/stream-xcode-progress.py
           TEST_STATUS=${PIPESTATUS[0]}
           python3 .github/scripts/report-xcode-errors.py Validation/unit-tests.log
           exit "$TEST_STATUS"
@@ -44,13 +52,10 @@ jobs:
         run: |
           set +e
           set -o pipefail
-          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerUITests -parallel-testing-enabled NO -resultBundlePath Validation/UITests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/ui-tests.log
+          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerUITests -test-timeouts-enabled YES -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 -parallel-testing-enabled NO -resultBundlePath Validation/UITests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/ui-tests.log | python3 -u .github/scripts/stream-xcode-progress.py
           TEST_STATUS=${PIPESTATUS[0]}
           python3 .github/scripts/report-xcode-errors.py Validation/ui-tests.log
           exit "$TEST_STATUS"
-      - name: Package compiled simulator app
-        if: always() && steps.build.outcome == 'success'
-        run: ditto -c -k --keepParent DerivedData/Build/Products/Debug-iphonesimulator/BusinessClicker.app Validation/BusinessClicker-Simulator.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:
