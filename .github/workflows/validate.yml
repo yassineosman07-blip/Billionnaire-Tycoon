@@ -9,16 +9,47 @@ jobs:
       - run: swift test --jobs 4
   ios:
     runs-on: macos-15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Select an available iPhone simulator
         run: |
-          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; print(next(d["udid"] for ds in json.load(sys.stdin)["devices"].values() for d in ds if d["name"].startswith("iPhone")))')
+          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; print(next(d["udid"] for runtime,ds in json.load(sys.stdin)["devices"].items() if "iOS" in runtime for d in ds if d["name"].startswith("iPhone")))')
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
-      - name: Build and test iOS app
-        run: xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -parallel-testing-enabled NO -resultBundlePath TestResults CODE_SIGNING_ALLOWED=NO
+          mkdir -p Validation
+      - name: Compile iOS simulator app
+        id: build
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          xcodebuild build -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/build.log
+          BUILD_STATUS=${PIPESTATUS[0]}
+          python3 .github/scripts/report-xcode-errors.py Validation/build.log
+          exit "$BUILD_STATUS"
+      - name: Test simulation, persistence and native 3D assets
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerTests -parallel-testing-enabled NO -resultBundlePath Validation/UnitTests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/unit-tests.log
+          TEST_STATUS=${PIPESTATUS[0]}
+          python3 .github/scripts/report-xcode-errors.py Validation/unit-tests.log
+          exit "$TEST_STATUS"
+      - name: Test iPhone user journeys
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerUITests -parallel-testing-enabled NO -resultBundlePath Validation/UITests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/ui-tests.log
+          TEST_STATUS=${PIPESTATUS[0]}
+          python3 .github/scripts/report-xcode-errors.py Validation/ui-tests.log
+          exit "$TEST_STATUS"
+      - name: Package compiled simulator app
+        if: always() && steps.build.outcome == 'success'
+        run: ditto -c -k --keepParent DerivedData/Build/Products/Debug-iphonesimulator/BusinessClicker.app Validation/BusinessClicker-Simulator.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ios-test-results
-          path: TestResults.xcresult
+          name: ios-build-and-test-results
+          path: Validation/

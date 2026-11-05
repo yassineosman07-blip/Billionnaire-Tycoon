@@ -1,7 +1,7 @@
 # BUSINESS CLICKER
 ## Cahier des charges fonctionnel, narratif, graphique et technique
 
-**Version :** 1.2 — Révision du 4 novembre 2026 : fiche personnage, entourage initial, portraits et actions quotidiennes
+**Version :** 1.5 — Révision du 5 novembre 2026 : ressources Kenney validées et passants humains décoratifs
 **Plateforme :** iOS (iPhone)  
 **Environnement :** Xcode  
 **Langage :** Swift  
@@ -552,7 +552,39 @@ Le joueur peut alors :
 
 Une difficulté financière ne doit pas entraîner systématiquement une perte définitive de la partie.
 
-## 6.10. Création et gestion d’un réseau
+## 6.10. Clientèle et habitudes de consommation
+
+La demande distingue au minimum employés de bureau, étudiants, familles et touristes. Chaque segment possède des habitudes de fréquentation, une sensibilité au prix et des préférences de produits, influencées par le quartier, les horaires, le jour de la semaine, la saison et les événements locaux.
+
+Exemples : les bureaux favorisent le déjeuner, les étudiants certaines soirées, les familles les périodes de repos et les touristes les zones et saisons attractives. Ces habitudes sont expliquées sur la fiche du quartier et dans une estimation de fréquentation avant l’ouverture du service.
+
+Le moteur calcule la demande de ces segments dans la journée simulée. Leur somme respecte la clientèle disponible, la concurrence locale, les stocks et la capacité de service ; une même clientèle ne doit pas être intégralement attribuée à chaque café voisin. Les passants affichés dans la ville représentent cette activité sans ajouter de nouvelles ventes au calcul économique.
+
+## 6.11. Réputation locale et avis des clients
+
+Chaque établissement possède sa propre réputation locale et un historique d’avis fictifs. Les commentaires reposent sur des causes calculées : attente, disponibilité des produits, prix, qualité, accueil ou confort. Ils ne sont pas tirés au hasard indépendamment des performances réelles.
+
+Afficher une note accompagnée de raisons compréhensibles et de pistes concrètes : « Attente élevée : former l’équipe », « Produit souvent épuisé : augmenter la réserve », « Prix appréciés ». Une variation de note doit pouvoir s’expliquer ; améliorer un commerce ne modifie pas automatiquement la note des autres établissements du réseau.
+
+La réputation agit progressivement sur la demande. Elle reste distincte de la fortune et de la réputation personnelle du protagoniste. Les avis ne constituent ni un réseau social réel ni un service connecté.
+
+## 6.12. Concurrents identifiables
+
+Ajouter plusieurs enseignes rivales fictives, reconnaissables dans la ville et dans les informations de quartier. Elles possèdent un positionnement économique lisible : prix bas, service rapide, qualité ou gamme premium.
+
+Les rivaux peuvent ouvrir un établissement ou lancer une promotion selon des règles simulées et sauvegardées. Le joueur peut répondre par son offre, ses horaires, la qualité ou le service ; il ne doit pas être obligé de copier systématiquement le prix le plus bas.
+
+Les caractéristiques de base d’un quartier restent fixes. L’arrivée d’un concurrent et une promotion ajoutent des modificateurs identifiés, bornés et datés à la concurrence effective, sans réécrire arbitrairement l’indice de base. Les concurrents n’occupent pas les parcelles déjà acquises et leurs décisions ne changent pas rétroactivement un résultat quotidien enregistré.
+
+## 6.13. Gestion rapide d’un empire
+
+Prévoir une vue comparant les établissements : bénéfice net, stocks, fréquentation, satisfaction et alertes, avec filtres par quartier, activité et réseau. Le joueur doit pouvoir identifier les commerces en difficulté sans ouvrir vingt fiches.
+
+Les actions groupées permettent de préparer des commandes de fournitures pour plusieurs adresses et de déléguer aux managers. Avant confirmation : afficher les établissements ciblés, les quantités, le coût total, les livraisons prévues et les exclusions. Aucun achat n’est validé au-delà de la trésorerie disponible ; un plan groupé non finançable demande un ajustement explicite, sans exécution partielle silencieuse.
+
+Les managers respectent des politiques visibles : seuil de stock, budget maximal et règles d’ouverture. Le joueur conserve la reprise manuelle. Ces opérations économiques ne consomment pas les trois actions personnelles de la journée et ne multiplient pas les revenus lors de la consolidation.
+
+## 6.14. Création et gestion d’un réseau
 
 Depuis Empire, une action « Ouvrir un établissement » reste disponible pour les types d’activités déjà possédés. Le parcours présente le type, l’emplacement, le nom, les coûts détaillés, les charges prévues et la trésorerie restante avant confirmation.
 
@@ -568,11 +600,13 @@ Les synergies se calculent selon les secteurs et conditions définies ; ouvrir d
 
 # 7. CARTE DE LA VILLE ET QUARTIERS
 
-## 7.1. Principe
+## 7.1. Principe : la ville est le cœur du jeu
 
-Le jeu intègre une carte interactive permettant de visualiser l'empire économique.
+**La ville vivante devient l’écran principal obligatoire après l’introduction et à la réouverture de la partie.** Le joueur gère son parcours depuis cet espace : il voit les quartiers, ses commerces, les bâtiments disponibles, son immobilier et les lieux de vie. La ville n’est plus une carte secondaire insérée dans un écran de statistiques.
 
-Chaque quartier possède des caractéristiques économiques distinctes.
+La nouvelle référence fournie par le créateur est une **ville de gestion dans l’esprit de SimCity**, vue en perspective isométrique, dense, détaillée et lisible. Elle remplace la référence précédente de petite ville low poly comme objectif de rendu final. L’inspiration concerne la richesse urbaine, la composition, les hauteurs et la lisibilité ; elle ne demande pas de reprendre la marque, les modèles ou les textures du jeu de référence.
+
+Chaque quartier conserve ses caractéristiques économiques distinctes. Le moteur de simulation reste la source des comptes ; l’apparence animée de la ville représente son état sans calculer des revenus supplémentaires.
 
 ## 7.2. Caractéristiques d'une zone
 
@@ -608,19 +642,108 @@ Exemple illustratif :
 
 Les valeurs définitives seront calibrées par le moteur économique.
 
-## 7.4. Ville 3D et fonctionnement de la carte
+## 7.4. Direction visuelle : ville de gestion détaillée
 
-**Direction validée : une ville 3D low poly colorée**, inspirée de la référence fournie par le créateur : immeubles pastel, petits commerces, routes et carrefours lisibles, passages piétons, trottoirs, arbres, voitures et éclairage soigné. La précédente proposition de carte isométrique 2D est remplacée.
+La scène représente une **véritable ville 3D navigable**, avec caméra inclinée et projection isométrique ou orthographique adaptée à l’iPhone. La direction visuelle privilégie une architecture urbaine crédible, des silhouettes variées et un rendu soigné plutôt qu’une série de blocs uniformes.
 
-Le joueur doit parcourir une vraie scène 3D avec caméra inclinée, déplacement tactile, zoom borné et sélection des bâtiments. La caméra ne doit pas traverser les bâtiments ni perdre le joueur hors de la ville. Chaque établissement possédé est représenté à son emplacement réel ; plusieurs cafés ont plusieurs bâtiments sélectionnables, avec noms et fiches distincts.
+Éléments obligatoires :
 
-L’apparence des bâtiments évolue avec le type d’activité et les améliorations. Les quartiers conservent leurs caractéristiques économiques fixes. Les commerces à acquérir, propriétés et établissements du joueur sont identifiables par des marqueurs lisibles, sans couvrir toute la scène.
+- Un centre urbain avec immeubles de bureaux, tours et bâtiments de hauteurs différentes.
+- Des quartiers résidentiels avec maisons, petits immeubles et espaces verts.
+- Des rues commerçantes où cafés, restaurants et autres commerces sont reconnaissables par leurs façades, vitrines, enseignes ou terrasses.
+- Des zones d’activités et de logistique adaptées aux entreprises concernées.
+- Des routes reliées, intersections, passages piétons, trottoirs, stationnements, mobilier urbain, arbres et parcs.
+- Des façades, fenêtres, toitures, matériaux et détails architecturaux cohérents ; les bâtiments ne partagent pas tous le même modèle simplement recoloré.
+- Un éclairage, des ombres et une palette permettant de distinguer les volumes et les voies sans masquer les informations de gestion.
 
-Le trafic et les passants servent à rendre la ville vivante ; leur animation décorative ne remplace pas le moteur économique et ne modifie pas ses résultats. Prévoir un niveau de détail réduit et la diminution du trafic sur les appareils moins puissants.
+La ville doit être intéressante visuellement dès le début, même lorsque le joueur ne possède que Tasty Crousty. Les bâtiments ambiants représentent des activités de la ville ; ils ne deviennent pas automatiquement la propriété du joueur. Ses acquisitions sont identifiables sans donner l’impression qu’il possède tous les immeubles visibles.
 
-**Technologie cible :** SceneKit intégré à SwiftUI, derrière un service de rendu distinct du moteur de simulation. Vérifier sa compatibilité et les recommandations Apple avec le SDK Xcode retenu avant réalisation. SpriteKit reste dédié aux particules et effets d’interface.
+Une image de fond, un rendu généré non interactif, une grille de cartes ou quelques volumes génériques ne satisfont pas cette exigence. La conformité visuelle doit être examinée dans une version exécutée, en comparaison avec la référence du créateur.
 
-La qualité attendue repose sur des modèles cohérents, des matériaux propres, une composition lisible et une palette maîtrisée. Une image générée de ville ou quelques blocs servant de fond ne satisfont pas cette exigence. Les modèles et textures intégrés doivent disposer des droits nécessaires ; la référence n’autorise pas à reprendre les ressources originales de son auteur.
+## 7.5. Quartiers, commerces et sélection
+
+Chaque quartier possède un nom visible à une échelle adaptée et une identité architecturale. En vue éloignée, les noms et zones facilitent l’orientation ; en zoom rapproché, les commerces et leurs alertes deviennent prioritaires. Éviter l’empilement de tous les libellés à toutes les échelles.
+
+Chaque établissement possédé correspond à une adresse sélectionnable. Deux cafés du même réseau apparaissent à deux emplacements distincts et ouvrent leurs fiches respectives. Les propriétés immobilières et les parcelles disponibles disposent également d’une représentation et d’une sélection cohérentes.
+
+Toucher un bâtiment le met en évidence et ouvre une fiche compacte superposée ou un panneau inférieur, sans obliger à quitter immédiatement la ville. Cette fiche montre le nom, le type, le quartier, le niveau, le statut utile et une commande « Gérer ». Les réglages détaillés s’ouvrent ensuite à la demande. Fermer la fiche restitue la position de caméra précédente.
+
+Toucher un quartier permet de consulter ses caractéristiques et ses opportunités. Des filtres permettent de mettre en évidence les établissements du joueur, les biens immobiliers, les opportunités ou les alertes. Une liste accessible des adresses reste disponible en parallèle de la scène 3D.
+
+## 7.6. Ville vivante
+
+Des voitures empruntent les routes et respectent leurs trajectoires ; elles ne traversent pas les bâtiments. Des piétons circulent sur les trottoirs et fréquentent les zones commerciales. Prévoir des détails contextualisés : clients près d’un commerce ouvert, livraison à une adresse concernée, terrasse animée ou chantier visible pendant une rénovation.
+
+La progression modifie concrètement la ville : nouvel établissement, façade améliorée, enseigne, chantier puis travaux terminés. Un café ne doit pas devenir arbitrairement un gratte-ciel parce qu’il augmente de niveau ; son évolution reste cohérente avec son activité.
+
+Ces animations donnent de la vie à l’espace et reflètent les états du jeu. Elles restent décoratives : une voiture ou un passant affiché ne crée pas une deuxième vente en plus de celle déjà simulée par le moteur. Les animations peuvent être ralenties ou réduites sans modifier l’économie.
+
+## 7.7. Bulles interactives au-dessus des lieux
+
+Les bulles sont ancrées aux bâtiments et se déplacent avec eux à l’écran lors du déplacement ou du zoom. Elles indiquent un fait réel de la sauvegarde, avec une icône et un libellé court :
+
+| Bulle | Condition | Action au toucher |
+|---|---|---|
+| Stocks bas ou épuisés | Réserve sous le seuil de l’établissement | Ouvrir les stocks de cette adresse |
+| Livraison attendue ou arrivée | Commande réelle et date correspondante | Consulter cette livraison |
+| Travaux en cours ou terminés | Chantier ou fin de chantier enregistrés | Ouvrir le bien et son état de travaux |
+| Opportunité | Offre ou événement éligible lié au lieu | Afficher la fiche ou les choix |
+| Message ou rendez-vous | Interaction disponible au lieu concerné | Ouvrir le message ou l’agenda |
+| Résultat de journée | Bilan nouvellement calculé | Consulter ce bilan, sans verser à nouveau les gains |
+
+Une bulle d’argent ne signifie jamais « toucher pour créer de l’argent » : les revenus sont déjà comptabilisés par la simulation. Une alerte n’apparaît pas si sa condition n’est plus vraie. Les informations résolues ou consultées disparaissent ou changent d’état selon leur fonction.
+
+Prioriser les alertes importantes, regrouper les bulles qui se chevauchent et adapter leur nombre au zoom. Plusieurs messages d’une même adresse peuvent être regroupés avec un compteur. Aucune pluie de bulles ne doit masquer les rues, le bouton de journée ou les commandes de navigation. Les bulles restent identifiables sans dépendre uniquement de la couleur, avec des zones tactiles accessibles.
+
+## 7.8. Caméra, lisibilité et performance
+
+Prévoir déplacement tactile, zoom borné, sélection et bouton de recentrage sur le commerce principal ou l’élément choisi. La caméra reste dans les limites de la ville et ne traverse pas le décor. L’interface permet de comprendre la sélection même lorsqu’un grand immeuble pourrait cacher le bâtiment visé.
+
+L’image 3D occupe l’essentiel de l’écran. Le texte superposé reste limité, contrasté et lisible. Les boutons de gestion restent accessibles avec les grandes tailles de texte et VoiceOver grâce à une alternative en liste. Le bouton de fin de journée reste fixé à l’écran pendant les mouvements de caméra.
+
+La technologie de rendu doit être choisie selon le SDK iOS retenu et la capacité à atteindre cette direction visuelle. SceneKit intégré à SwiftUI reste la base envisagée, à confirmer avec les recommandations Apple ; le choix technique ne doit pas réduire silencieusement l’ambition de la ville. Le rendu est séparé du moteur économique et des données persistantes.
+
+Optimiser les modèles, les matériaux, les niveaux de détail, les objets hors champ et le nombre de voitures et de passants. Viser 60 images/s sur l’appareil de référence retenu et au moins 30 images/s en mode réduit, à mesurer sur appareil avant validation. Suspendre les animations hors écran et en arrière-plan. Une dégradation réglable réduit les détails et le trafic, en conservant les quartiers, commerces et interactions nécessaires au jeu.
+
+## 7.9. Améliorations visibles et visite des commerces
+
+Les améliorations modifient réellement l’établissement, à l’extérieur ou à l’intérieur : terrasse, devanture, machine, comptoir, cuisine, décoration ou mobilier. La fiche d’achat explique le coût, les effets estimés, les conditions, la durée éventuelle et la limite de capacité concernée.
+
+Exemples : machine plus rapide, terrasse augmentant la capacité lorsqu’elle est exploitable, décoration favorisant le confort, formation améliorant le service. Les bénéfices prévus sont présentés comme des estimations soumises à la demande et aux stocks. Ils ne sont pas garantis par la seule dépense.
+
+Le joueur peut entrer dans ses commerces pour voir leur aménagement, leurs équipements et leur personnel. Un établissement fermé ou en travaux présente un état visuel cohérent. Les modèles et variantes restent adaptés au type d’activité ; une amélioration de café n’ajoute pas arbitrairement une tour de bureaux.
+
+## 7.10. Événements de quartier
+
+Marché, concert, festival, travaux routiers et fermeture temporaire d’une rue peuvent modifier la fréquentation ou l’accessibilité d’une zone pour plusieurs jours. Ces événements ont un quartier, une date de début, une date de fin et des effets économiques explicites.
+
+Une annonce et un calendrier permettent d’anticiper les stocks et les horaires. Les événements prévisibles sont annoncés avant leur effet ; les imprévus restent limités et compréhensibles. La ville les matérialise : stands, foule, barrières, chantier ou rue fermée. Les véhicules et piétons adaptent leurs parcours visuels.
+
+Les effets locaux se combinent selon des règles documentées et bornées avec la météo, les segments de clients et la concurrence. Les caractéristiques économiques de base du quartier restent fixes. La fermeture d’une rue ne supprime pas définitivement une entreprise et ne permet pas de louer deux fois la même clientèle disponible.
+
+## 7.11. Météo, saisons et prévisions
+
+La météo suit le calendrier du jeu et fonctionne hors connexion. Les saisons et les jours de la semaine proviennent de la date simulée, jamais d’une API météo réelle ni du jour réel du téléphone. Les prévisions et événements climatiques sont déterministes à état et graine identiques, conservés lors d’un redémarrage et cohérents lors de la simulation d’une absence.
+
+La pluie peut diminuer la fréquentation d’une terrasse et renforcer certaines activités intérieures. Une période estivale favorise certains marchés touristiques. Les effets dépendent du secteur et de l’équipement : la météo ne doit pas appliquer le même bonus ou malus à toute l’économie.
+
+Afficher les prévisions des trois prochaines journées, les effets attendus et les possibilités d’adaptation. Les changements purement graphiques ne consomment pas une action. Les effets restent modérés et bornés, sans créer une punition financière imprévisible ni un blocage définitif de début de partie.
+
+La représentation graphique de la pluie ou des saisons peut être réduite sans supprimer les informations utiles ou modifier les résultats de simulation.
+
+
+## 7.12. Ressources Kenney fournies et rôle des passants
+
+Le créateur a fourni les archives `kenney_city-kit-commercial_2.1.zip` et `kenney_animated-characters-retro.zip`. Leurs licences CC0 sont conservées dans le projet avec les fichiers d’origine et leur provenance.
+
+**City Kit Commercial 2.1** fournit la base des commerces, immeubles et gratte-ciel : utiliser les modèles et textures du pack plutôt que remplacer leur géométrie par des blocs génériques. Compléter les rues, espaces verts, véhicules et zones résidentielles pour constituer une ville cohérente. L’approbation de ce pack fixe les ressources de base ; elle ne constitue pas à elle seule une validation de la composition finale ou d’un rendu identique à une référence.
+
+**Animated Characters Retro 1.1 est réservé aux passants ambiants, et à eux seuls.** Utiliser uniquement les apparences humaines masculine et féminine. Exclure les zombies des ressources embarquées. Conserver le rig et les animations fournies lors de leur conversion vers le format natif choisi ; ne pas présenter une translation d’un personnage figé comme une animation de marche.
+
+Ces passants ne sont ni le protagoniste ni les membres de sa famille, les amis ou les investisseurs. Ils ne créent aucun contact, événement, revenu ou statistique sociale. Les personnages importants et leurs fiches conservent leurs portraits 3D cartoon distincts. La nouvelle partie garde exactement ses quatre contacts initiaux.
+
+Les passants empruntent les trottoirs, restent hors des bâtiments et s’arrêtent avec la scène en arrière-plan. Limiter leur nombre et les simplifier en mode réduit. Documenter toute conversion de modèles, vérifier les textures, les os et les animations, puis tester leur chargement et leur rendu réels dans l’application iOS.
+
 
 ---
 
@@ -872,6 +995,12 @@ Une animation, un son d’acquisition et un retour haptique confirment uniquemen
 Les biens servent à la collection, au confort, à la personnalisation, au patrimoine et à certaines opportunités. Ils peuvent modifier le garage, le logement ou les espaces de collection visibles du joueur. Les photos restent consultables après l’achat.
 
 La richesse matérielle ne procure jamais automatiquement l’amitié ou l’affection d’un personnage. Toute dépense récurrente, restriction ou valeur de revente doit être indiquée avant l’achat si cette mécanique s’applique.
+## 9.7. Logement et garage personnels visitables
+
+Le protagoniste peut visiter son logement et son garage, en complément des intérieurs de commerces et de boutiques. Les biens achetés apparaissent dans des emplacements cohérents : véhicules au garage, objets et œuvres dans le logement ou une collection.
+
+L’inventaire demeure la source de propriété. Placer, déplacer ou consulter un objet ne crée ni nouvel exemplaire ni nouvelle valeur patrimoniale. Les biens dont le nombre dépasse l’espace visible restent consultables dans la collection, sans être supprimés. Le logement personnel ne génère pas de loyer comme un investissement locatif tant qu’aucune conversion explicite n’est prévue.
+
 
 ---
 
@@ -1051,6 +1180,14 @@ Les probabilités ne doivent jamais produire un personnage ou une situation inco
 Pour chaque action, créer un identifiant unique, enregistrer la journée, l’activité, le point consommé, la graine ou l’état aléatoire et le résultat avant sa présentation. Fermer, rouvrir, revenir en arrière ou appuyer deux fois ne permet ni de relancer le tirage ni de recevoir deux fois les 100 €. Une interruption après validation reprend le même résultat à la réouverture.
 
 La page présente une courte animation et un son adapté, puis le résultat avec ses conséquences. En l’absence d’événement : retour explicite comme « Une sortie tranquille, rien de particulier aujourd’hui ». Consulter ensuite l’historique des actions et événements reste gratuit.
+## 10.12. Relations présentes dans la ville
+
+Les contacts connus peuvent proposer une rencontre dans un lieu concret : un café, un parc, un bar ou un établissement à visiter. Un investisseur peut demander à découvrir un commerce ; le frère peut proposer une sortie. L’agenda indique la date, le lieu et la préparation requise, et la ville peut afficher une bulle sur ce lieu.
+
+La scène de rencontre présente le portrait, un contexte et des choix cohérents avec l’historique. Les personnages conservent la mémoire des engagements et échanges importants. La relation progresse par étapes lisibles : connaissance, confiance, amitié, relation professionnelle ou vie de couple selon le contexte.
+
+La présence d’un personnage dans la ville ne débloque pas automatiquement son contact. La mère, le père, le frère et l’ex-femme restent les quatre seules personnes connues d’une nouvelle partie. Les sorties et rencontres volontaires respectent le budget commun de trois actions ; ouvrir la ville ou consulter une bulle ne crée pas un nouveau point de budget.
+
 
 ---
 
@@ -1108,6 +1245,34 @@ Les événements doivent être suffisamment nombreux pour limiter la répétitio
 
 Des délais de réapparition, des conditions de déclenchement et des variantes narratives doivent être prévus.
 
+## 11.6. Tirage quotidien d’un événement de ville
+
+**Chaque journée simulée comporte une probabilité de déclencher un événement**, indépendamment des actions personnelles du site de rencontre et du bar. Cette règle remplace un déclenchement systématique tous les trois jours. Une journée peut se terminer sans événement.
+
+Proposition initiale d’équilibrage : **40 % de probabilité par journée**, paramétrable et à ajuster après essais. Ce pourcentage est une proposition, pas une valeur déjà imposée par le créateur. Le moteur effectue au maximum un tirage quotidien et ne choisit que parmi les événements compatibles avec l’état du joueur, leurs délais de réapparition et les événements uniques déjà traités.
+
+Exemples : proposition de prestation pour un café, problème de fournisseur, visite d’un investisseur déjà rencontré, invitation d’un proche, petite trouvaille, occasion immobilière ou incident technique. Les résultats économiques et narratifs doivent être variés et reliés aux règles des systèmes existants.
+
+Enregistrer la journée, l’état aléatoire ou la graine, le résultat du tirage, l’identifiant de l’événement obtenu ou l’absence d’événement. Relancer l’application ou consulter plusieurs fois le bilan ne doit pas produire un nouveau tirage pour la même journée. S’il n’existe aucun événement éligible, enregistrer une journée sans événement.
+
+## 11.7. Pop-up d’événement et décisions
+
+Lorsqu’un événement quotidien se déclenche pendant une journée jouée, une **fenêtre de choix apparaît au-dessus de la ville** après la simulation. Elle présente un titre, un visuel ou portrait adapté, le contexte, les personnes ou lieux concernés et les choix possibles. Chaque événement comprend au moins deux choix cohérents, dont une possibilité gratuite lorsque l’événement est facultatif et que le joueur pourrait manquer d’argent.
+
+Les choix précisent leurs coûts, conditions et effets connus. Un choix indisponible est désactivé avec une explication. Les issues incertaines sont annoncées comme telles ; aucune promesse de bénéfice garanti ne doit être affichée si le résultat dépend d’un tirage.
+
+Une seule fenêtre d’événement s’affiche à la fois. Le bilan quotidien, les messages et les autres événements ne doivent pas ouvrir plusieurs modales simultanément. Le bilan demeure consultable après les choix ou depuis l’historique. Le passage au jour suivant est temporairement désactivé tant que la fenêtre ouverte attend une décision ; si l’événement peut être reporté, une commande explicite permet de le ranger dans le journal et de reprendre le jeu.
+
+La fermeture ou le report ne vaut jamais acceptation d’un choix. Une interruption ou un redémarrage conserve l’événement et la décision encore attendue. L’application enregistre le choix et ses conséquences dans une transaction unique ; un double appui ne débite, ne crédite et ne débloque rien une deuxième fois.
+
+Un événement lié à une adresse peut aussi créer une bulle sur le bâtiment concerné. Toucher cette bulle ouvre l’événement existant ; cela ne déclenche pas un nouveau tirage.
+
+## 11.8. Absence et file d’événements
+
+Les journées calculées lors d’une absence suivent les mêmes tirages quotidiens. Les événements demandant un choix rejoignent une file persistante, sans réponse automatique à la place du joueur. Les dépenses ordinaires de simulation continuent selon les règles économiques ; aucune conséquence propre à un choix non effectué n’est appliquée comme s’il avait été accepté.
+
+Au retour, afficher un récapitulatif et le nombre d’événements en attente. Proposer leur consultation un par un et leur journal, plutôt qu’une succession incontrôlée de fenêtres bloquant la navigation. Les règles d’expiration éventuelles sont définies par événement, présentées explicitement et ne permettent pas de recréer une récompense déjà obtenue. Une longue absence ne doit pas bloquer la simulation ni supprimer silencieusement les choix en attente.
+
 ---
 
 # 12. MISSIONS, OBJECTIFS ET RÉCOMPENSES
@@ -1151,6 +1316,14 @@ Les récompenses peuvent comprendre :
 ## 12.4. Succès
 
 Prévoir un écran recensant les succès obtenus, leur progression et les récompenses associées.
+## 12.5. Objectif personnel choisi par le joueur
+
+Le joueur peut sélectionner un objectif principal parmi plusieurs parcours : ouvrir trois cafés, acheter sa première maison, développer ses relations ou constituer un portefeuille immobilier. Le suivi indique la prochaine étape réalisable, la progression et les conditions utiles, sans imposer une histoire linéaire.
+
+Un seul objectif principal est épinglé dans l’interface de ville pour préserver sa lisibilité. Le joueur peut changer son objectif suivi sans perdre les étapes déjà accomplies. Les récompenses demeurent uniques : changer d’objectif ou le sélectionner à nouveau ne permet pas de les recevoir une deuxième fois.
+
+Les objectifs personnels complètent les missions quotidiennes et les succès, avec des conditions utilisant les mêmes données de sauvegarde et sans compteur de progression fictif.
+
 
 ---
 
@@ -1217,7 +1390,7 @@ Les nouveaux marchés et investissements maintiennent l'intérêt stratégique.
 
 L’interface adopte une direction **jeu de gestion premium avec boutons arcade lumineux**, inspirée de la planche de référence fournie : contours biseautés, angles coupés ou formes hexagonales selon l’action, matière sombre ou métallique, liserés lumineux colorés, icônes lisibles et libellés courts en français.
 
-La ville suit la direction 3D low poly décrite au chapitre 7. Les boutiques ont chacune leur décor, leur palette et leur ambiance. Les articles utilisent des photographies réelles. Ces trois univers doivent être articulés par une interface commune cohérente.
+La ville suit désormais la direction de ville de gestion détaillée, inspirée de SimCity et décrite au chapitre 7. La scène urbaine prime visuellement sur les cadres et les panneaux ; les boutons arcade restent concentrés sur les actions importantes. Les boutiques ont chacune leur décor, leur palette et leur ambiance. Les articles utilisent des photographies réelles. Ces trois univers doivent être articulés par une interface commune cohérente.
 
 Le fond violet sombre `#171326`, l’accent `#9568EA` et la lavande `#EDE5FF` restent des repères de navigation. Des accents cyan, vert, ambre et magenta distinguent les familles d’actions. Les couleurs locales des boutiques ne sont pas limitées au violet.
 
@@ -1225,37 +1398,37 @@ La référence de boutons sert de guide visuel, pas de feuille de sprites à cop
 
 ## 15.2. Navigation
 
-La navigation se fait par onglets.
+L’accueil et la carte sont regroupés dans une seule destination principale : **Ville**. Après l’introduction et à la réouverture, le joueur y accède directement.
 
-**Organisation proposée :**
+Organisation cible des cinq onglets :
 
-1. Accueil.
+1. Ville.
 2. Empire.
-3. Carte.
-4. Vie.
-5. Patrimoine.
+3. Vie.
+4. Patrimoine.
+5. Finances.
 
-Les fonctionnalités secondaires sont accessibles à l'intérieur de ces sections.
+Le tableau de bord financier existant rejoint Finances ; les fonctions de l’ancien accueil restent accessibles depuis l’interface de ville, la fiche Personnage et le journal. Les fonctionnalités économiques et sociales antérieures sont conservées.
 
-Une **icône de portrait du protagoniste est placée en haut à gauche** des cinq écrans principaux. Elle ouvre la page Personnage, avec un libellé d’accessibilité « Mon personnage ». Son emplacement est stable ; sur un écran secondaire, conserver la commande Retour habituelle et rendre le portrait accessible sans gêner cette navigation.
+Le portrait du protagoniste reste **en haut à gauche**, ouvrant la page Personnage. Sur les écrans secondaires, préserver la commande Retour. Les autres commandes de navigation ne recouvrent ni les bulles importantes ni le bouton de journée.
 
-## 15.3. Écran d'accueil
+## 15.3. Écran principal Ville et bouton de journée
 
-L'écran principal affiche :
+La scène urbaine remplit l’espace principal, sans être enfermée dans une petite carte au milieu d’une liste de panneaux. L’interface superposée reste légère :
 
-- Le personnage ou un visuel représentatif.
-- La pile de billets cliquable.
-- La date actuelle.
-- Le solde.
-- Le bénéfice journalier estimé.
-- La fortune nette.
-- Un bouton permettant d'avancer au lendemain.
-- Les événements importants.
-- Les notifications internes.
+- Portrait du protagoniste en haut à gauche.
+- Jour, date et trésorerie lisibles en haut.
+- Bénéfice prévu et actions restantes consultables sans encombrer la scène ; les comptes détaillés restent dans Finances.
+- Bulles contextuelles au-dessus des lieux.
+- Commandes de recentrage, filtres et accès au journal.
+- Fiche compacte lorsqu’un commerce, une propriété ou un quartier est sélectionné.
+- **Bouton « Passer au lendemain » fixé en bas au centre**, dans une zone stable au-dessus de la barre d’onglets et de la zone de sécurité de l’iPhone.
 
-La pile de billets doit rester un élément central de l'identité visuelle.
+Le bouton de journée reste visible pendant le déplacement et le zoom. Son appui exécute une seule journée complète, puis met à jour la ville, les stocks, les comptes, les travaux et les bulles. Il ne génère jamais d’argent directement. Pendant le calcul, son état indique « Simulation… » et refuse les appuis supplémentaires.
 
-Son interaction sert à avancer le cycle économique, et non à créer de l'argent sans justification économique.
+En cas d’événement quotidien, la fenêtre de choix apparaît au-dessus de la ville selon le chapitre 11. Sinon, un retour visuel et sonore bref confirme la nouvelle journée ; le bilan reste accessible sans forcer une fenêtre à chaque passage.
+
+La pile de billets peut rester un motif du bouton ou de l’identité graphique. Elle n’est plus tenue d’occuper le centre de l’accueil et ne remplace pas la ville. Toute avance de plusieurs jours est une action secondaire explicitement choisie, avec traitement cohérent de la file d’événements.
 
 ## 15.4. Écran Empire
 
@@ -1263,9 +1436,11 @@ Cet écran regroupe les secteurs, les types d’activités, les réseaux et les 
 
 Le joueur peut consulter les fiches d'entreprise, gérer leurs paramètres, recruter des employés et acheter des améliorations.
 
-## 15.5. Écran Carte
+## 15.5. Navigation dans la ville et accès rapide
 
-La carte affiche les quartiers, les commerces, les biens immobiliers et les extensions débloquées.
+Les anciennes fonctions Carte sont intégrées à Ville. Le joueur doit pouvoir repérer les quartiers, sélectionner ses commerces et propriétés, identifier les emplacements disponibles et retrouver rapidement un établissement précis par recherche ou liste.
+
+La sélection d’un lieu affiche sa fiche compacte au-dessus de la ville ; le détail de gestion s’ouvre à la demande et revient ensuite au même cadrage. Les bulles et le journal sont des accès à des états et événements existants, sans duplication de revenus ni de décisions.
 
 ## 15.6. Écran Vie
 
@@ -1337,6 +1512,16 @@ Les statistiques proviennent de la sauvegarde et des calculs du jeu ; aucun indi
 Afficher une carte illustrée pour le site de rencontre et une autre pour le bar, un bouton arcade de lancement, le coût d’une action et le compteur restant. Préciser qu’un événement n’est pas garanti. Les détails peuvent présenter les probabilités indicatives et les conditions d’éligibilité de l’activité.
 
 Un résultat s’affiche dans une fiche dédiée, avec portrait en cas de rencontre, choix narratifs éventuels et résumé des effets. Une nouvelle connaissance apparaît immédiatement dans les contacts après enregistrement. La fermeture de cette fiche ne supprime pas un résultat en attente de choix. Un historique daté permet de revoir les rencontres, les occasions manquées et les gains obtenus.
+## 15.12. Premières minutes et apprentissage progressif
+
+Après l’introduction narrative, un premier service guidé accompagne cinq étapes : régler un prix, préparer une commande d’ingrédients, terminer un service, lire son bénéfice puis choisir une première activité personnelle. Les explications sont courtes, contextuelles et reliées aux vraies commandes de jeu.
+
+L’apprentissage doit pouvoir se terminer avec les 100 € et les stocks initiaux. Il prend en compte le délai réel de livraison : une commande n’est pas livrée instantanément pour faire réussir une étape. Il ne demande pas d’acheter une amélioration ou un bien inaccessible au joueur débutant.
+
+Présenter les systèmes avancés au moment où ils deviennent utiles. Une aide consultable et une commande permettant de passer les explications évitent de bloquer les joueurs expérimentés ; leurs actions et leur progression restent conservées.
+
+L’interface de ville doit répondre rapidement à « Que puis-je faire maintenant ? » : alerte de stock, préparation du service, action personnelle disponible ou prochain objectif. Les détails de gestion restent accessibles à la demande, sans multiplication de panneaux permanents.
+
 
 ---
 
@@ -1428,7 +1613,12 @@ Enregistrer notamment :
 - Relations.
 - Messages.
 - Agenda.
-- Événements.
+- Événements, résultats des tirages quotidiens et file des choix en attente.
+- Segments de clientèle, réputation locale et avis des établissements.
+- Enseignes rivales, promotions et implantations simulées.
+- Événements locaux datés, météo et prévisions enregistrées.
+- Équipements visibles, disposition des biens personnels, objectif suivi et progression du tutoriel.
+- Politiques des managers et plans économiques groupés confirmés.
 - Missions.
 - Succès.
 - Paramètres.
@@ -1524,7 +1714,7 @@ Chaque journée est exécutée dans un ordre cohérent :
 8. Appliquer les charges.
 9. Calculer les loyers et occupations.
 10. Mettre à jour les statistiques.
-11. Déclencher les événements éligibles.
+11. Déclencher les événements éligibles, en conservant un seul tirage quotidien. Les prévisions, événements de quartier, promotions et segments de clientèle doivent avoir été actualisés avant le calcul de la demande ; les avis sont calculés à partir du service réellement exécuté.
 12. Actualiser le calendrier.
 13. Sauvegarder la progression.
 
@@ -1627,7 +1817,29 @@ Avec une graine fixe, vérifier le déterminisme des résultats et l’exclusion
 
 Simuler une interruption avant et après l’enregistrement : une action payée conserve son résultat, une nouvelle rencontre ne duplique pas le personnage et une trouvaille de 100 € n’est créditée qu’une fois. Vérifier qu’une rencontre d’investisseur ne débloque pas un financement sans acceptation. Tester le tout sans réseau.
 
-## 19.7. Performances
+## 19.7. Validation de la ville principale et des événements quotidiens
+
+Vérifier l’arrivée directe dans Ville après introduction et réouverture, la présence du bouton en bas au centre avec les zones de sécurité et les grandes tailles de texte, la conservation de la caméra lors des sélections, ainsi que l’alternative en liste et VoiceOver.
+
+Tester les bulles avec des stocks réellement bas, une livraison, des travaux et un événement ; vérifier leur suppression ou mise à jour après résolution, leur regroupement au dézoom et l’absence de revenus supplémentaires au toucher. Contrôler l’identification distincte des cafés d’un même réseau et des biens immobiliers.
+
+Pour les événements quotidiens : vérifier un seul tirage par journée, un résultat déterministe à graine fixe, les journées sans événement, les conditions d’éligibilité, les délais de réapparition, les événements uniques et la distinction avec les trois actions personnelles. Tester les choix indisponibles, le report, les doubles appuis, la fermeture pendant la sauvegarde et la reprise de la même décision après redémarrage.
+
+Simuler plusieurs journées et une longue absence : aucune avalanche de fenêtres, aucun choix automatique, aucune récompense dupliquée et aucune perte silencieuse d’événement en attente. Vérifier la file de présentation entre récapitulatif d’absence, événement et bilan.
+
+Une revue visuelle sur appareil doit comparer l’expérience exécutée à la référence : diversité des volumes et façades, densité, quartiers reconnaissables, routes continues, circulation cohérente, sélection et lisibilité. Mesurer les performances au niveau de détail maximal puis en mode réduit, avec un empire développé. Une validation du moteur seul ou une capture statique ne suffit pas.
+
+## 19.8. Tests des systèmes enrichis de la ville
+
+Vérifier les variations de demande par segment, horaire, jour et saison, la répartition de la clientèle entre établissements, les contraintes de capacité et de stocks, ainsi que les causes réelles des avis. Les améliorations visibles doivent correspondre aux équipements acquis et à leurs effets actifs.
+
+Tester les dates d’événements locaux, les routes fermées et leur réouverture, les prévisions météo, les secteurs affectés et le maintien des valeurs de base des quartiers. Avec une même graine, un passage manuel et une absence doivent produire les mêmes conditions journalières avant application du rendement hors ligne.
+
+Tester les enseignes rivales, leurs promotions bornées et les parcelles réservées, sans double calcul de concurrence ou mutation rétroactive des journées. Pour la gestion groupée : contrôler la prévisualisation, le budget total, l’unicité des commandes, les délais de livraison et le refus sans exécution partielle silencieuse lorsque le plan est invalide.
+
+Vérifier les rencontres localisées et leur budget d’actions, les étapes de relations, les objets placés dans les intérieurs sans duplication patrimoniale, le changement d’objectif sans récompense répétée et le premier service guidé avec le capital initial réel. Les animations réduites doivent conserver exactement les mêmes résultats économiques.
+
+## 19.9. Performances
 
 Le jeu doit rester réactif avec toutes les entreprises débloquées, un patrimoine important et de nombreuses relations actives.
 
@@ -1675,7 +1887,10 @@ La première version complète demandée à Codex doit contenir :
 - Des entreprises améliorables jusqu'au niveau 100.
 - Des synergies automatiques.
 - Des employés et managers.
-- Une ville 3D low poly interactive conforme à la référence de direction artistique.
+- Une ville 3D de gestion détaillée inspirée de SimCity, utilisée comme écran principal.
+- Des quartiers et commerces reconnaissables, des propriétés sélectionnables, du trafic et des piétons.
+- Des bulles interactives ancrées aux bâtiments et un bouton de journée fixé en bas au centre.
+- Un tirage probabiliste quotidien d’événement, une fenêtre avec choix et une file persistante pour les absences.
 - Des quartiers avec des caractéristiques fixes.
 - Des biens immobiliers achetables.
 - Un système locatif avec choix des loyers.
@@ -1696,6 +1911,11 @@ La première version complète demandée à Codex doit contenir :
 - Des statistiques avec graphiques.
 - Une sauvegarde locale automatique.
 - Des paramètres audio et graphiques.
+- Des clients aux habitudes différenciées et des avis liés aux performances réelles.
+- Des améliorations visibles et des commerces, logements et garages visitables.
+- Des événements de quartier, une météo et des saisons avec prévisions et effets bornés.
+- Des concurrents identifiables et une gestion rapide des réseaux.
+- Des rencontres localisées, un objectif personnel suivi et un apprentissage progressif.
 - Des tests avancés.
 
 Les systèmes doivent être reliés entre eux et non constitués uniquement d'écrans de démonstration.
@@ -1729,6 +1949,14 @@ Il devra privilégier le code fonctionnel plutôt que des interfaces simulées s
 Aucun écran ne doit prétendre offrir une fonctionnalité qui n'est pas implémentée.
 
 Si certains éléments nécessitent des ressources externes indisponibles, des ressources locales de remplacement peuvent servir au développement, avec leurs limites signalées. Pour les photographies réelles d’articles, les remplacements ne satisfont pas la livraison finale : identifier les visuels et autorisations encore manquants.
+## 22.1. Réalisation et build à suivre par Codex
+
+Le protocole détaillé est fourni dans **[CODEX_BUILD.md](CODEX_BUILD.md)** : état des lieux du dépôt, ordre de réalisation, ressources nécessaires, validations du moteur, build Xcode, tests sur simulateur et revue visuelle sur appareil.
+
+Les priorités de réalisation sont : ville principale et lisibilité, clientèle et améliorations visibles, événements de quartier, puis intérieurs, relations localisées et outils de gestion d’empire. Les dix enrichissements acceptés restent tous dans la cible ; cet ordre ne les transforme pas en fonctionnalités facultatives.
+
+Codex doit distinguer une source écrite, une syntaxe vérifiée, un moteur testé, une application compilée et une application exécutée et examinée sur iPhone. Il ne peut pas annoncer une ville conforme à la référence sur la seule base de tests économiques. Si la machine est sous Linux, terminer les travaux possibles et rapporter explicitement la validation Apple restant à effectuer.
+
 
 ---
 
@@ -1766,6 +1994,19 @@ Le projet sera considéré comme fonctionnel lorsque le joueur pourra :
 28. Retrouver le même compteur et le même résultat après redémarrage, sans nouveau tirage ni double récompense.
 29. Récupérer trois actions au lendemain, sans cumul des actions inutilisées ni exécution automatique de sorties durant l’absence.
 30. Découvrir de nouveaux contacts et des opportunités selon des tables d’événements éligibles, avec des gains exceptionnels distincts des ventes des entreprises.
+31. Arriver directement dans une ville vivante après l’introduction et à la réouverture, avec quartiers, commerces et silhouettes architecturales lisibles.
+32. Utiliser le bouton de journée fixé en bas au centre tout en conservant le cadrage de la ville ; les doubles appuis n’exécutent qu’une simulation.
+33. Toucher une bulle pour consulter le bon établissement, chantier, message ou événement, sans créditer une deuxième fois un revenu.
+34. Obtenir un événement selon un tirage quotidien sauvegardé, choisir une réponse dans une fenêtre et constater ses conséquences une seule fois.
+35. Retrouver après redémarrage les événements en attente et les journées déjà tirées, y compris après une longue absence.
+36. Vérifier sur appareil la conformité visuelle de la ville à la direction de la référence et la lisibilité des commandes, bulles et quartiers aux différents niveaux de zoom.
+37. Comprendre sa clientèle et les causes de ses avis, puis constater les effets d’un réglage ou d’un équipement acquis.
+38. Anticiper un événement de quartier ou une météo prévue et constater leur début et leur fin sans modification des caractéristiques de base du quartier.
+39. Identifier des rivaux et comparer ou préparer des commandes pour plusieurs établissements avec un coût total confirmé et sans double achat.
+40. Visiter ses commerces, son logement et son garage et y retrouver les acquisitions réellement possédées.
+41. Participer à une rencontre dans un lieu de la ville sans contourner le budget de trois actions.
+42. Choisir puis changer un objectif personnel sans perdre ses étapes ou répéter une récompense.
+43. Terminer le premier parcours guidé avec les 100 € et stocks initiaux, en respectant les délais de livraison.
 
 L'ensemble doit fonctionner sur iPhone, sans connexion Internet obligatoire.
 
@@ -1777,7 +2018,7 @@ Les décisions explicitement validées par le créateur sont prioritaires.
 
 Certains points ont évolué depuis le concept initial :
 
-**Le clic :** initialement source directe de revenus, il devient principalement un moyen de faire avancer le calendrier et de déclencher les résultats des activités économiques.
+**Le clic :** initialement source directe de revenus, il sert à faire avancer le calendrier et à déclencher les résultats économiques via le bouton de journée de la ville.
 
 **Les revenus passifs :** ils sont désormais calculés à partir des journées simulées plutôt qu'à partir d'un simple compteur par seconde.
 
@@ -1795,7 +2036,11 @@ Certains points ont évolué depuis le concept initial :
 
 **Établissements multiples :** les 40 entrées minimum définissent des types d’activités. Le joueur peut créer plusieurs établissements du même type et constituer une chaîne.
 
-**Ville :** la référence de ville 3D low poly colorée remplace la proposition de carte 2D. La caméra, les bâtiments et les interactions doivent être réels dans le jeu.
+**Ville :** la nouvelle référence de ville de gestion dans l’esprit de SimCity remplace l’objectif précédent de petite ville low poly. Une vraie scène 3D détaillée devient l’écran principal, avec quartiers, commerces, propriétés, trafic et piétons. Une simple image de fond ou des blocs uniformes ne satisfont pas cette cible.
+
+**Fin de journée :** la commande principale est fixée en bas au centre au-dessus des onglets. Le clic avance la simulation ; la pile de billets reste facultative comme motif et n’occupe plus obligatoirement le centre de l’accueil.
+
+**Bulles et événements de ville :** les lieux possèdent des bulles contextuelles liées à leurs états réels. Chaque journée comporte un tirage d’événement, avec fenêtre de choix si un événement est obtenu. Le taux de 40 % est une proposition d’équilibrage ; le caractère quotidien et probabiliste ainsi que la présentation des choix sont des exigences validées. Ces événements ne consomment pas automatiquement les trois actions personnelles.
 
 **Boutiques :** Patrimoine est organisé en catégories comprenant plusieurs magasins. Chaque magasin possède un intérieur et une direction artistique spécifiques.
 
@@ -1808,6 +2053,10 @@ Certains points ont évolué depuis le concept initial :
 **Portraits :** tous les personnages utilisent des portraits illustrés 3D cartoon dans le style de la référence, avec une identité propre. L’exigence de vraies photographies concerne les articles de boutique, pas les personnages.
 
 **Actions quotidiennes :** le site de rencontre fictif et le bar partagent trois actions par jour de jeu. Chaque action validée déclenche un tirage persistant ; un événement n’est pas garanti. Les probabilités proposées sont des valeurs d’équilibrage, tandis que la limite de trois et les deux activités sont des exigences validées. La monnaie reste l’euro.
+
+**Ville enrichie :** les dix propositions sont intégrées à la cible : habitudes de clientèle, améliorations visibles, événements locaux, avis clients, rivaux, intérieurs visitables, relations dans la ville, objectif personnel, météo et saisons, gestion rapide de plusieurs commerces. Les conditions de base des quartiers restent fixes ; les effets variables sont des modificateurs séparés et sauvegardés.
+
+**Réalisation Codex :** appliquer le protocole de build et de validation sans confondre compilation, tests du moteur et conformité visuelle sur appareil. Le présent travail de documentation ne constitue ni une réalisation de ces nouveautés ni une validation de build.
 
 Les choix non définitivement tranchés, comme le contenu exhaustif des catalogues, les noms des personnages et certaines valeurs d'équilibrage, doivent être résolus par des propositions cohérentes avec ce document, sans supprimer les fonctionnalités validées.
 
@@ -1829,6 +2078,6 @@ Ses choix économiques et personnels influencent les événements qu'il rencontr
 
 Au fil des jours, son patrimoine grandit et sa ville se transforme.
 
-Le joueur peut finalement diriger un vaste empire tout en conservant la possibilité de gérer individuellement ses activités.
+Le joueur parcourt une ville vivante qui constitue le cœur de l’expérience : quartiers, commerces, lieux de vie et opportunités rendent son évolution visible. Il peut finalement diriger un vaste empire tout en conservant la possibilité de gérer individuellement ses activités.
 
 **L'objectif n'est pas simplement de devenir riche : c'est de simuler le parcours complet d'un entrepreneur, de ses premières difficultés jusqu'à la construction d'un empire économique et personnel.**

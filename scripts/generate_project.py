@@ -10,11 +10,11 @@ def add(key, text): objects.append(f'\t\t{uid(key)} = {{ {text} }};')
 app_sources = sorted(p for p in (root / 'BusinessClicker').rglob('*.swift') if 'Tests' not in p.parts and 'UITests' not in p.parts)
 unit_sources = sorted((root / 'BusinessClicker/Tests').rglob('*.swift'))
 ui_sources = sorted((root / 'BusinessClicker/UITests').rglob('*.swift'))
-resources = sorted(p for p in (root / 'BusinessClicker/Resources').iterdir() if p.suffix in ['.wav', '.xcassets', '.xcprivacy', '.png', '.jpg', '.json'])
+resources = sorted(p for p in (root / 'BusinessClicker/Resources').iterdir() if p.name == 'Kenney' or p.suffix in ['.wav', '.xcassets', '.xcprivacy', '.png', '.jpg', '.json'])
 all_files = app_sources + unit_sources + ui_sources + resources
 for p in all_files:
     path = p.relative_to(root).as_posix()
-    kind = {'swift': 'sourcecode.swift', 'wav': 'audio.wav', 'xcassets': 'folder.assetcatalog', 'xcprivacy': 'text.xml', 'png': 'image.png', 'jpg': 'image.jpeg', 'json': 'text.json'}[p.suffix[1:]]
+    kind = {'swift': 'sourcecode.swift', 'wav': 'audio.wav', 'xcassets': 'folder.assetcatalog', 'xcprivacy': 'text.xml', 'png': 'image.png', 'jpg': 'image.jpeg', 'json': 'text.json', '': 'folder'}[p.suffix[1:]]
     add(path, f'isa = PBXFileReference; lastKnownFileType = {kind}; path = {q(path)}; sourceTree = SOURCE_ROOT;')
     add(path + '-build', f'isa = PBXBuildFile; fileRef = {uid(path)};')
 products = [('app', 'BusinessClicker.app', 'wrapper.application'), ('unit', 'BusinessClickerTests.xctest', 'wrapper.cfbundle'), ('ui', 'BusinessClickerUITests.xctest', 'wrapper.cfbundle')]

@@ -1,0 +1,16 @@
+[
+  {
+    "archive": "kenney_city-kit-commercial_2.1.zip",
+    "sha256": "f8b09b081c2bb88bcc126e2dec1cb40fd0dad7e7e591b6c26aaefe96fb35276b",
+    "license": "CC0-1.0",
+    "creator": "Kenney",
+    "runtime": "city"
+  },
+  {
+    "archive": "kenney_animated-characters-retro.zip",
+    "sha256": "1d03f1fb001f3cf629425b69c898df58261a316616220ea25b58bd35298e6882",
+    "license": "CC0-1.0",
+    "creator": "Kenney",
+    "runtime": "pedestrians"
+  }
+]

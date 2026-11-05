@@ -69,7 +69,16 @@ struct CityViewport: UIViewRepresentable {
         if signature != context.coordinator.signature {
             let oldRig = view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false)?.position
             let oldZoom = view.pointOfView?.camera?.orthographicScale
-            view.scene = CitySceneBuilder.make(businesses, properties: properties, reduced: reduced)
+            do {
+                view.scene = try CitySceneBuilder.make(businesses, properties: properties, reduced: reduced)
+                view.viewWithTag(7281)?.removeFromSuperview()
+            } catch {
+                view.scene = nil
+                let label = UILabel(frame: view.bounds); label.tag = 7281; label.numberOfLines = 0
+                label.text = error.localizedDescription; label.textColor = .white; label.textAlignment = .center
+                label.autoresizingMask = [.flexibleWidth, .flexibleHeight]; view.addSubview(label)
+                context.coordinator.signature = ""; return
+            }
             view.pointOfView = view.scene?.rootNode.childNode(withName: "camera", recursively: true)
             if let oldRig { view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false)?.position = oldRig }
             if let oldZoom { view.pointOfView?.camera?.orthographicScale = oldZoom }

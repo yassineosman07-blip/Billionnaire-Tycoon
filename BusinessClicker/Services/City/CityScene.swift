@@ -1,7 +1,7 @@
 import SceneKit
 import UIKit
 
-/// Original low-poly geometry. Decorative traffic never drives economic simulation.
+/// Kenney commercial models, original streets and decorative traffic. No economic simulation here.
 @MainActor enum CitySceneBuilder {
     static let centers: [(Float, Float)] = [(-60,30),(0,30),(-60,-25),(0,-25),(60,0)]
     static func location(_ plot: Int) -> SCNVector3 {
@@ -21,7 +21,7 @@ import UIKit
         let g = SCNBox(width: width, height: height, length: length, chamferRadius: bevel); g.materials = [m]
         let n = SCNNode(geometry: g); n.position = at; parent.addChildNode(n); return n
     }
-    static func make(_ businesses: [Business], properties: [Property], reduced: Bool) -> SCNScene {
+    static func make(_ businesses: [Business], properties: [Property], reduced: Bool) throws -> SCNScene {
         let scene = SCNScene(); scene.background.contents = UIColor(red: 0.72, green: 0.87, blue: 0.93, alpha: 1)
         scene.fogColor = UIColor(red: 0.72, green: 0.87, blue: 0.93, alpha: 1); scene.fogStartDistance = 200; scene.fogEndDistance = 400
         box(scene.rootNode, 210, 0.6, 145, SCNVector3(0,-0.5,0), material(UIColor(red: 0.45, green: 0.66, blue: 0.46, alpha: 1)))
@@ -32,9 +32,13 @@ import UIKit
         for plot in 0..<120 {
             let point = location(plot); let owned = businesses.first { $0.plot == plot }
             let parcel = SCNNode(); parcel.position = point; parcel.name = owned.map { "branch-\($0.id)" } ?? "plot-\(plot)"
-            box(parcel, 7.4, 0.18, 8.5, SCNVector3(0,0.02,0), pavement)
-            if let owned { building(parcel, type: owned.definitionID, level: owned.level, seed: plot) }
-            else if plot % 4 != 0 { building(parcel, type: plot % 12 + 1, level: plot % 35 + 1, seed: plot) }
+            box(parcel, 7.4, 0.18, 7, SCNVector3(0,0.02,0), pavement)
+            if let owned { try building(parcel, type: owned.definitionID, level: owned.level, seed: plot) }
+            else if plot % 4 != 0 {
+                let district = plot / 24
+                let type = district == 2 ? (plot % 3 == 0 ? 24 : 18) : district == 4 ? 20 : plot % 12 + 1
+                try building(parcel, type: type, level: plot % 35 + 1, seed: plot)
+            }
             else {
                 box(parcel, 5.5, 0.08, 6.5, SCNVector3(0,0.16,0), material(UIColor(red: 0.54, green: 0.74, blue: 0.48, alpha: 1)))
                 tree(parcel, at: SCNVector3(-1.5,0.2,0)); tree(parcel, at: SCNVector3(1.5,0.2,1))
@@ -42,12 +46,12 @@ import UIKit
             if plot % 2 == 0 { tree(parcel, at: SCNVector3(-3,0.2,3)) }
             let flattened = parcel.flattenedClone(); flattened.name = parcel.name; scene.rootNode.addChildNode(flattened)
         }
-        for z: Float in [10,-45,59] { box(scene.rootNode,170,0.08,3.8,SCNVector3(-5,0,z),road) }
+        for z: Float in [10,-45,59] { box(scene.rootNode,170,0.08,3,SCNVector3(-5,0,z),road) }
         for definition in Catalog.properties {
             let parcel = SCNNode(); parcel.name = "property-\(definition.id)"; parcel.position = SCNVector3(-80 + Float(definition.id) * 10,0,65)
-            box(parcel,7.4,0.18,8.5,SCNVector3(0,0.02,0),pavement)
+            box(parcel,7.4,0.18,7,SCNVector3(0,0.02,0),pavement)
             let owned = properties.first { $0.id == definition.id }
-            building(parcel,type:3,level:20 + (owned?.renovations ?? 0) * 15,seed:definition.id + 2)
+            try building(parcel,type:3,level:20 + (owned?.renovations ?? 0) * 15,seed:definition.id + 2)
             let clone = parcel.flattenedClone(); clone.name=parcel.name;scene.rootNode.addChildNode(clone)
         }
         if !reduced {
@@ -58,6 +62,7 @@ import UIKit
                 scene.rootNode.addChildNode(vehicle)
             }
         }
+        try KenneyAssets.addPedestrians(to: scene.rootNode, reduced: reduced)
         let rig = SCNNode(); rig.name = "cameraRig"
         let camera = SCNNode(); camera.name = "camera"; camera.camera = SCNCamera(); camera.camera?.usesOrthographicProjection = true; camera.camera?.orthographicScale = 78
         camera.camera?.zNear = 0.1; camera.camera?.zFar = 600; camera.position = SCNVector3(90,110,125); camera.look(at: SCNVector3(0,0,0)); rig.addChildNode(camera); scene.rootNode.addChildNode(rig)
@@ -67,11 +72,11 @@ import UIKit
         let c = centers[district]
         let group = SCNNode(); group.position = SCNVector3(c.0,0,c.1)
         for z: Float in [-20,0,20] {
-            box(group, 56, 0.08, 3.8, SCNVector3(0,0,z), road)
+            box(group, 56, 0.08, 3, SCNVector3(0,0,z), road)
             for x in stride(from: -25, through: 25, by: 5) { box(group, 2.4, 0.015, 0.10, SCNVector3(Float(x),0.055,z), white) }
         }
         for x: Float in [-25,0,25] {
-            box(group, 3.8, 0.09, 44, SCNVector3(x,0.005,0), road)
+            box(group, 3, 0.09, 44, SCNVector3(x,0.005,0), road)
             for z in stride(from: -18, through: 18, by: 6) { box(group, 0.1, 0.015, 2.5, SCNVector3(x,0.065,Float(z)), white) }
             for z: Float in [-17,3] {
                 for i in 0..<5 { box(group, 0.35, 0.02, 2.6, SCNVector3(x + Float(i) * 0.6 - 1.2,0.08,z), white) }
@@ -80,28 +85,10 @@ import UIKit
         }
         root.addChildNode(group.flattenedClone())
     }
-    private static func building(_ parent: SCNNode, type: Int, level: Int, seed: Int) {
+    private static func building(_ parent: SCNNode, type: Int, level: Int, seed: Int) throws {
         if type == 0 { truck(parent); return }
-        let floors = type == 2 || type == 1 ? 1 : min(6, 2 + level / 22 + seed % 2)
-        let h = CGFloat(floors) * 1.9
-        let facade = material(colors[seed % colors.count])
-        box(parent, 5.2, h, 6.1, SCNVector3(0,Float(h / 2)+0.2,0), facade, bevel: 0.08)
-        for floor in 0..<floors {
-            let y = Float(floor) * 1.9 + 1.3
-            box(parent, 5.45, 0.16, 6.35, SCNVector3(0,y-0.9,0), white)
-            for x: Float in [-1.7,0,1.7] {
-                for z: Float in [-3.08,3.08] { box(parent, 1.35, 1.1, 0.07, SCNVector3(x,y,z), glass) }
-            }
-            for z: Float in [-1.9,0,1.9] { box(parent, 0.07, 1.1, 1.3, SCNVector3(2.63,y,z), glass) }
-        }
-        box(parent, 5.6, 0.22, 6.5, SCNVector3(0,Float(h)+0.3,0), white)
-        box(parent, 1.3, 0.5, 1.5, SCNVector3(0.8,Float(h)+0.65,0.5), dark)
-        box(parent, 1.15, 1.6, 0.08, SCNVector3(0,1,3.12), glass)
-        if floors == 1 {
-            for i in 0..<6 { box(parent, 0.88, 0.18, 1.5, SCNVector3(Float(i)*0.88-2.2,2.05,3.6), i % 2 == 0 ? facade : white) }
-            box(parent, 4.6, 0.35, 0.13, SCNVector3(0,2.5,3.17), dark)
-            for x: Float in [-2,2] { box(parent, 0.7,0.07,0.7,SCNVector3(x,0.7,4),white); box(parent,0.09,0.65,0.09,SCNVector3(x,0.4,4),dark) }
-        }
+        let name = KenneyAssets.buildingName(type: type, level: level, seed: seed)
+        parent.addChildNode(try KenneyAssets.building(named: name))
     }
     private static func tree(_ parent: SCNNode, at point: SCNVector3) {
         let node = SCNNode(); node.position = point

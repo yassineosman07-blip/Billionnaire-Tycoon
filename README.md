@@ -62,3 +62,11 @@ L’accès au démon Docker géré peut demander l’escalade du bac à sable de
 Le projet Xcode est livré et peut être régénéré avec `python3 scripts/generate_project.py`. Cette commande remplace le projet et le schéma ; préserver toute personnalisation avant usage. La configuration CI prévoit Swift sous Linux et `xcodebuild test` sur macOS. Les tâches cloud utilisent le checkout existant, sans worktree supplémentaire.
 
 La revue iPhone doit couvrir la compilation avec les frameworks Apple, le rendu et les performances de SceneKit, les grandes tailles de texte, VoiceOver, la synchronisation sonore, les notifications, les haptiques et la réouverture réelle. Les tests du moteur ne certifient pas ces points. Les prix du jeu et le rythme de progression restent à équilibrer par des sessions de jeu.
+
+## Modèles Kenney fournis le 5 novembre 2026
+
+Les bâtiments commerciaux utilisent désormais les OBJ/MTL/textures de **Kenney City Kit Commercial 2.1**. Les passants utilisent uniquement les apparences humaines du pack **Animated Characters Retro**, converties avec leur rig et leurs animations en Collada. Ils n’ajoutent aucun contact ni revenu ; les portraits des personnages importants restent inchangés. Aucun zombie n’est embarqué.
+
+Les fichiers sont livrés dans `BusinessClicker/Resources/Kenney`, conservé comme dossier de ressources pour respecter les chemins relatifs. Les archives CC0 et la provenance figurent dans `AssetsSource/Kenney`. Contrôle local : `python3 scripts/validate-kenney.py`. La conversion requiert Blender et Assimp uniquement pour régénérer les modèles ; l’application ne dépend pas de ces outils.
+
+Le cahier des charges est passé à la version 1.5. Les évolutions décrites comme cibles dans les dernières révisions ne doivent pas toutes être considérées comme déjà implémentées par cette intégration de ressources. Voir `docs/VALIDATION.md` pour les vérifications effectivement exécutées et le build Apple encore bloqué par l’autorisation d’envoi GitHub.

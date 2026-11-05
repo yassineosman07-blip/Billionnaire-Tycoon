@@ -1,0 +1,54 @@
+{
+  "tool": "Blender 4.3.2 + Assimp 5.4.3",
+  "license": "CC0-1.0",
+  "models": [
+    {
+      "file": "male-run.dae",
+      "skin": "male",
+      "animation": "run",
+      "joints": 58,
+      "channels": 59,
+      "frames": [
+        1,
+        17
+      ],
+      "fps": 24
+    },
+    {
+      "file": "male-idle.dae",
+      "skin": "male",
+      "animation": "idle",
+      "joints": 58,
+      "channels": 59,
+      "frames": [
+        1,
+        33
+      ],
+      "fps": 24
+    },
+    {
+      "file": "female-run.dae",
+      "skin": "female",
+      "animation": "run",
+      "joints": 58,
+      "channels": 59,
+      "frames": [
+        1,
+        17
+      ],
+      "fps": 24
+    },
+    {
+      "file": "female-idle.dae",
+      "skin": "female",
+      "animation": "idle",
+      "joints": 58,
+      "channels": 59,
+      "frames": [
+        1,
+        33
+      ],
+      "fps": 24
+    }
+  ]
+}

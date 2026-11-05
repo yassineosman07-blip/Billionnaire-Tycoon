@@ -147,7 +147,7 @@ struct MediaCreditsView: View {
     var body: some View {
         Screen {
             Panel("Créations du jeu") {
-                Text("Ville et intérieurs : géométrie originale réalisée pour ce projet. Portraits : illustrations 3D cartoon originales générées pour Business Clicker. Sons et ambiances : synthèse locale originale.").font(.subheadline)
+                Text("Bâtiments commerciaux et passants : Kenney, City Kit Commercial 2.1 et Animated Characters Retro 1.1, licence CC0. Rues, décors et intérieurs complémentaires : géométrie originale du projet. Portraits : illustrations 3D cartoon originales générées pour Business Clicker. Sons et ambiances : synthèse locale originale.").font(.subheadline)
             }
             ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
                 Panel(entry["name"] ?? "Photographie") {

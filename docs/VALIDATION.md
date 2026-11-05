@@ -48,3 +48,24 @@ Les scènes utilisent des modèles procéduraux originaux et non les modèles 3D
 L’accès à Wikimedia Commons a été refusé par la politique réseau avec un HTTP 403. Les deux domaines nécessaires ont été enregistrés dans le brouillon d’environnement ; cela ne les active pas et ne publie pas l’environnement. Il faut une activation par le workflow de paramètres de l’environnement avant de reprendre l’acquisition des sources.
 
 `python3 scripts/validate-assets.py --require-photos` échoue actuellement de manière attendue et explicite : les 32 photographies autorisées manquent. Le manifeste, l’importateur avec contrôle de provenance et les crédits sont préparés ; aucune photo générée ou d’un autre modèle n’est présentée comme une photographie réelle du produit. Voir [PHOTOGRAPHS.md](media/PHOTOGRAPHS.md). La conformité visuelle complète au cahier des charges reste donc non validée.
+
+## Intégration Kenney — 5 novembre 2026
+
+Le créateur a fourni City Kit Commercial 2.1 et Animated Characters Retro 1.1, puis confirmé que les modèles rétro servent uniquement aux passants. Les archives et leurs empreintes sont conservées dans AssetsSource/Kenney ; leurs licences CC0 sont embarquées avec les ressources.
+
+Vérifications exécutées :
+
+- 41 modèles OBJ avec MTL et palette, références des textures présentes.
+- Deux apparences humaines, aucun fichier zombie dans les ressources de l’application.
+- Conversion par Blender 4.3.2 et la bibliothèque Assimp installée (paquet libassimp5 5.4.3+ds-2 ; API annonçant 5.4.0).
+- Quatre Collada homme/femme × idle/run, chacun conservant 58 articulations et 59 canaux.
+- Réimport des quatre Collada par Assimp : un maillage, un matériau et une animation pour chaque fichier.
+- Contrôle des durées : 16/24 s pour run et 32/24 s pour idle. Correction de l’unité de temps issue de l’export Collada.
+- Contrôle de déformation après réimport d’un personnage animé dans Blender : les poses à deux instants diffèrent réellement ; la figure n’est pas simplement translatée sans animation.
+- 51 tests portables exécutés sans échec ; projet OpenStep à 142 objets et syntaxe Swift vérifiés.
+
+Les tests iOS `KenneyAssetTests` ont été ajoutés pour le chargement ModelIO/SceneKit, les squelettes et animations ainsi que le rôle purement décoratif des passants. Ils ne sont pas exécutés sous Linux. Le cycle fourni est run, ralenti pour les déplacements ; aucun cycle walk absent du pack n’est inventé.
+
+Le workflow macOS sépare compilation, tests unitaires natifs et tests UI ; il peut conserver le `.app` de simulateur dans un ZIP. L’envoi du commit d’intégration vers `main` a été refusé par le contrôle automatique d’approbation, qui invoque la consigne antérieure de ne rien publier et exige une nouvelle autorisation explicite pour cette écriture distante. Aucun envoi alternatif n’a été utilisé pour contourner le refus. La compilation de cette version sur macOS reste donc non lancée, dans l’attente de cette autorisation.
+
+La page publique du workflow antérieur au commit 594ab56 indique un échec ; les journaux détaillés ne sont pas accessibles avec les accès présents. Les annotations ajoutées au workflow doivent faciliter le diagnostic du prochain build. Une réussite des tests Linux ne remplace ni le chargement Apple de ces fichiers ni la revue du rendu iPhone.
