@@ -1,5 +1,6 @@
 import Foundation
 import SceneKit
+import SceneKit.ModelIO
 import ModelIO
 import UIKit
 
