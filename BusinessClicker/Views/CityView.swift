@@ -136,6 +136,8 @@ struct CityViewport: UIViewRepresentable {
         view.isPlaying = true; view.autoenablesDefaultLighting = false; view.allowsCameraControl = false
         // SwiftUI's list of places exposes equivalent actions without traversing SceneKit.
         view.isAccessibilityElement = false; view.accessibilityElementsHidden = true
+        let coordinator=context.coordinator
+        view.layoutChanged = { [weak coordinator] in coordinator?.projectNotices() }
         let pan=UIPanGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.pan(_:)))
         let pinch=UIPinchGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.pinch(_:)))
         let tap=UITapGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.tap(_:)))
@@ -170,20 +172,16 @@ struct CityViewport: UIViewRepresentable {
         context.coordinator.updateNotices(notices, view: view)
         if context.coordinator.focusToken != focusToken { context.coordinator.focusToken = focusToken; context.coordinator.recenter(view) }
     }
-    static func dismantleUIView(_ uiView: SCNView, coordinator: Coordinator) { coordinator.displayLink?.invalidate(); coordinator.displayLink=nil; uiView.isPlaying = false; uiView.scene = nil }
+    static func dismantleUIView(_ uiView: SCNView, coordinator: Coordinator) { (uiView as? PausableCityView)?.layoutChanged=nil; uiView.isPlaying = false; uiView.scene = nil }
     @MainActor final class Coordinator: NSObject, UIGestureRecognizerDelegate {
         var select: (Int?, Int?, Int?) -> Void
         var signature = ""
         var focusToken = 0
         var openEvent: (Int) -> Void = { _ in }
         weak var view: SCNView?
-        var displayLink: CADisplayLink?
         var notices: [CityNotice] = []
         var bubbles: [String:UIButton] = [:]
         var districtLabels: [UILabel] = []
-        var projectedBounds = CGRect.null
-        var projectedCamera = SCNMatrix4Identity
-        var projectedZoom: Double = -1
         init(select: @escaping (Int?, Int?, Int?) -> Void) { self.select = select }
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
             var target=touch.view
@@ -194,6 +192,7 @@ struct CityViewport: UIViewRepresentable {
             let origin = CitySceneBuilder.location(0)
             view.scene?.rootNode.childNode(withName:"cameraRig",recursively:false)?.position = SCNVector3(origin.x,0,origin.z)
             view.pointOfView?.camera?.orthographicScale = 31
+            projectNotices()
         }
         func updateNotices(_ items: [CityNotice], view: SCNView) {
             self.view=view;notices=Array(items.prefix(12))
@@ -217,16 +216,11 @@ struct CityViewport: UIViewRepresentable {
                     label.sizeToFit();label.frame.size.width += 18;label.frame.size.height=27;view.addSubview(label);districtLabels.append(label)
                 }
             }
-            projectedBounds = .null
-            if displayLink==nil { let link=CADisplayLink(target:self,selector:#selector(projectNotices));link.preferredFramesPerSecond=30;link.add(to:.main,forMode:.common);displayLink=link }
             projectNotices()
         }
         @objc func projectNotices() {
             guard let view,view.window != nil,let scene=view.scene,!scene.isPaused else { return }
-            let camera = view.pointOfView?.presentation.worldTransform ?? SCNMatrix4Identity
-            let zoom = view.pointOfView?.presentation.camera?.orthographicScale ?? 0
-            guard projectedBounds != view.bounds || projectedZoom != zoom || !SCNMatrix4EqualToMatrix4(projectedCamera,camera) else { return }
-            projectedBounds = view.bounds; projectedCamera = camera; projectedZoom = zoom
+            let zoom = view.pointOfView?.camera?.orthographicScale ?? 0
             var occupied: [CGRect] = []
             for item in notices {
                 guard let button=bubbles[item.id] else { continue }
@@ -259,10 +253,12 @@ struct CityViewport: UIViewRepresentable {
             rig.position.x = max(-95, min(95, rig.position.x - Float(t.x + t.y * 0.5) * scale))
             rig.position.z = max(-70, min(70, rig.position.z + Float(t.x * 0.5 - t.y) * scale))
             gesture.setTranslation(.zero, in: view)
+            projectNotices()
         }
         @objc func pinch(_ gesture: UIPinchGestureRecognizer) {
             guard let view = gesture.view as? SCNView, let camera = view.pointOfView?.camera else { return }
             camera.orthographicScale = max(16, min(125, camera.orthographicScale / Double(gesture.scale))); gesture.scale = 1
+            projectNotices()
         }
         @objc func tap(_ gesture: UITapGestureRecognizer) {
             guard let view = gesture.view as? SCNView else { return }
@@ -280,7 +276,10 @@ struct CityViewport: UIViewRepresentable {
 }
 
 @MainActor final class PausableCityView: SCNView {
+    var layoutChanged: (() -> Void)?
+    override func layoutSubviews() { super.layoutSubviews(); layoutChanged?() }
     override func didMoveToWindow() {
         super.didMoveToWindow(); isPlaying = window != nil; scene?.isPaused = window == nil
+        layoutChanged?()
     }
 }

@@ -2,7 +2,7 @@
 
 Jeu iPhone natif en français, iOS 17+, SwiftUI / MVVM, SceneKit, SpriteKit, SwiftData, Swift Charts et AVFoundation. Aucun compte, serveur, publicité ou achat intégré. Les règles de la cible figurent dans le [cahier des charges](docs/CAHIER_DES_CHARGES.md).
 
-**État réel :** voir [la liste des fonctions réalisées et manquantes](docs/ETAT_REALISATION.md). Le cahier des charges n’est pas intégralement implémenté. Le commit `57c9a66` remplace l’ancien accueil par la ville en grand, avec bouton de journée fixe, bulles et événements à choix ; ses résultats Xcode sont suivis séparément. Les bâtiments et passants Kenney ont passé leurs tests natifs sur la version précédente. **Les 32 photographies commerciales restent absentes.**
+**État réel :** voir [la liste des fonctions réalisées et manquantes](docs/ETAT_REALISATION.md). Le cahier des charges n’est pas intégralement implémenté. Le commit `57c9a66` remplace l’ancien accueil par la ville en grand, avec bouton de journée fixe, bulles et événements à choix ; ses résultats Xcode sont suivis séparément. Les bâtiments et passants Kenney ont passé leurs tests natifs, y compris dans le workflow de `8f4079e`. **Les 32 photographies commerciales restent absentes.**
 
 ## Ouvrir le projet
 
@@ -74,7 +74,7 @@ Le cahier des charges est passé à la version 1.5. Les évolutions décrites co
 
 ### Build de simulateur
 
-Le [workflow du commit 7e7f1f0](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42183108545) conserve l’artefact **BusinessClicker-Simulator-Intel** après la compilation. Depuis un compte GitHub autorisé, télécharger cet artefact sur la page du run, puis extraire son ZIP intérieur. Il s’agit d’un `.app` pour simulateur Intel ; pour un Mac Apple Silicon ou un iPhone physique, reconstruire depuis les sources avec Xcode et la destination appropriée. La compilation de cet artefact a réussi ; consulter le workflow et `docs/VALIDATION.md` pour le résultat séparé des tests.
+Le [workflow du commit 8f4079e](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42189256440) conserve l’artefact **BusinessClicker-Simulator-Intel** après la compilation. Depuis un compte GitHub autorisé, télécharger cet artefact sur la page du run, puis extraire son ZIP intérieur. Il s’agit d’un `.app` pour simulateur Intel ; pour un Mac Apple Silicon ou un iPhone physique, reconstruire depuis les sources avec Xcode et la destination appropriée. La compilation de cet artefact a réussi ; consulter le workflow et `docs/VALIDATION.md` pour le résultat séparé des tests.
 
 L’artefact **ios-build-and-test-results** conserve les journaux de compilation et les tests unitaires. Les parcours sont désormais exécutés dans trois jobs indépendants et conservés dans les artefacts **ios-ui-test-results-…** ; ouvrir son `UITests.xcresult` avec Xcode pour consulter les résultats et les captures effectivement conservées. Le test de l’accueil prévoit une capture « Ville principale Kenney ». Ces captures proviennent du simulateur ; la maquette de direction artistique reste un document distinct.
 

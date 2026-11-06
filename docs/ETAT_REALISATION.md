@@ -4,7 +4,7 @@ Le cahier des charges définit une cible. Il ne constitue pas une liste de fonct
 
 | Fonction | État constaté dans le code | Validation |
 |---|---|---|
-| Ville comme écran principal, scène occupant l’espace, bouton de journée en bas | Implémenté dans `57c9a66` | Compilation Xcode réussie ; parcours UI non validés (délai CI dépassé) |
+| Ville comme écran principal, scène occupant l’espace, bouton de journée en bas | Implémenté dans `57c9a66` | Compilation Xcode réussie ; parcours UI encore en échec |
 | Quartiers, commerces sélectionnables, recentrage et liste des lieux | Implémenté | Revue visuelle de la nouvelle interface à effectuer |
 | Modèles commerciaux Kenney | Intégrés avec textures | Chargement natif validé dans les runs `42023352240` et `42179809019` |
 | Passants Kenney humains, sans zombies, distincts des personnages importants | Intégrés et animés | Tests natifs de squelettes et animations réussis dans les runs `42023352240` et `42179809019` |
@@ -30,5 +30,7 @@ Le cahier des charges définit une cible. Il ne constitue pas une liste de fonct
 - La nouvelle interface a réussi la compilation Xcode, le conditionnement de son `.app` de simulateur et les tests unitaires natifs ; les parcours UI sont suivis dans le [run 42179809019](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42179809019). Ce run a échoué sur deux contrôles UI et dépassé son délai global. Les requêtes et l’isolation du job UI sont corrigées pour la prochaine exécution ; les parcours restent à valider.
 
 - Les contrôles corrigés sont suivis dans le [run 42183108545](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42183108545), commit `7e7f1f0`, avec un job de parcours UI indépendant. La compilation, les tests portables et les tests unitaires natifs ont réussi. Le job `ios-ui` a été annulé après dépassement de sa limite de 25 minutes ; ses parcours ne sont pas validés.
+
+- La correction suivante, `8f4079e`, est suivie dans le [run 42189256440](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42189256440). Elle fournit un accès en liste aux mêmes alertes et retire le rendu 3D de l’arbre d’accessibilité. La compilation, les tests portables et les tests unitaires natifs sont réussis ; les trois parcours UI échouent lors des captures après l’introduction. La projection continue des bulles est supprimée pour la prochaine validation.
 
 La maquette générée précédemment est une référence de direction artistique, pas une capture d’application. Aucun rendu « pixel par pixel » ni niveau de fluidité sur iPhone n’est certifié par ce document.

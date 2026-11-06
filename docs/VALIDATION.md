@@ -1,4 +1,23 @@
-# Vérification de la refonte 1.2 — 4 novembre 2026
+# Vérifications de l’application
+
+## Correction de la ville principale — 6 novembre 2026
+
+Résultats du commit `8f4079e` : [workflow 42189256440](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42189256440).
+
+| Contrôle | Résultat |
+|---|---|
+| Tests portables du moteur | **57 tests réussis** |
+| Compilation Xcode et app de simulateur | **Réussies** |
+| Tests unitaires natifs | **Réussis** |
+| Accueil, journée et sauvegarde | Échec : délai de capture UI |
+| Boutique et fiche article | Échec à l’arrivée sur la ville |
+| Trois actions et relance | Échec à l’arrivée sur la ville |
+| Photographies commerciales | **0/32 : non intégrées** |
+| Revue visuelle et fluidité sur appareil physique | Non exécutées |
+
+L’accessibilité des commerces, propriétés et alertes passe par « Liste des lieux ». Le rendu SceneKit est exclu de l’arbre d’accessibilité pour éviter les blocages de capture, tout en conservant ses interactions tactiles.
+
+## Historique de la refonte 1.2 — 4 novembre 2026
 
 ## Résultats exécutés sur Linux
 
@@ -95,3 +114,5 @@ Le job `ios-ui` du run `42183108545` a dépassé sa limite de 25 minutes et a é
 Le diagnostic final du job UI relève des délais de capture d’accessibilité dès l’ouverture de la ville (lignes 25 et 55 du test), avant les parcours proprement dits. La scène est corrigée pour exposer uniquement ses marqueurs interactifs et éviter les mises à jour UIKit à chaque image quand la caméra et le cadrage sont immobiles. Chaque parcours est désormais lancé séparément pour conserver son propre diagnostic. Cette correction de rendu nécessite une nouvelle vérification native.
 
 Le run `42187105833` compile la correction. Son premier parcours arrive sur la ville et conserve `JOUR 1` dans son diagnostic, mais la requête du bouton de journée expire encore. Le rendu SceneKit est donc entièrement retiré de l’arbre d’accessibilité ; les mêmes actions de stocks, travaux et événements sont accessibles dans la liste des lieux. Les interactions visuelles dans la scène restent en place. Cette correction nécessite sa propre vérification native.
+
+Les trois parcours du run `42189256440` échouent encore dans les requêtes de capture à l’arrivée sur la ville. La boucle CADisplayLink ajoutée pour les bulles est supprimée : projection uniquement lors du layout, du déplacement, du zoom, du recentrage et des changements de données. Un export optionnel d’aperçu JPEG du parcours initial est ajouté aux diagnostics CI ; il ne remplace pas le résultat des tests. Cette modification reste à valider sur le prochain run.

@@ -76,6 +76,12 @@ jobs:
           TEST_STATUS=${PIPESTATUS[0]}
           python3 .github/scripts/report-xcode-errors.py Validation/ui-tests.log
           exit "$TEST_STATUS"
+      - name: Export a small native city preview
+        if: always() && matrix.journey == 'testFirstServiceAndPersistence'
+        continue-on-error: true
+        run: |
+          xcrun xcresulttool export attachments --path Validation/UITests.xcresult --output-path "$RUNNER_TEMP/city-preview-attachments"
+          python3 .github/scripts/export-city-preview.py "$RUNNER_TEMP/city-preview-attachments" Validation/CityPreview.jpg
       - uses: actions/upload-artifact@v4
         if: always()
         with:
