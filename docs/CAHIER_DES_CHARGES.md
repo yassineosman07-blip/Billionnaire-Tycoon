@@ -13,7 +13,7 @@
 
 ---
 
-> Cette version définit la cible à réaliser. Les nouvelles exigences ne sont pas encore implémentées dans le jeu actuel. Les références visuelles fournies dans la conversation guident la direction artistique ; elles ne constituent pas des ressources intégrées au projet.
+> Cette version définit la cible à réaliser. Consulter [l’état de réalisation](ETAT_REALISATION.md) pour distinguer les fonctions présentes, manquantes et en cours de validation. Les références visuelles fournies dans la conversation guident la direction artistique ; les ressources effectivement intégrées sont recensées séparément avec leur provenance.
 
 # 1. VISION GLOBALE
 

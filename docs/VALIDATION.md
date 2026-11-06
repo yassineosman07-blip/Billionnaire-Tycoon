@@ -66,6 +66,22 @@ Vérifications exécutées :
 
 Les tests iOS `KenneyAssetTests` ont été ajoutés pour le chargement ModelIO/SceneKit, les squelettes et animations ainsi que le rôle purement décoratif des passants. Ils ne sont pas exécutés sous Linux. Le cycle fourni est run, ralenti pour les déplacements ; aucun cycle walk absent du pack n’est inventé.
 
-Le workflow macOS sépare compilation, tests unitaires natifs et tests UI ; il peut conserver le `.app` de simulateur dans un ZIP. L’envoi du commit d’intégration vers `main` a été refusé par le contrôle automatique d’approbation, qui invoque la consigne antérieure de ne rien publier et exige une nouvelle autorisation explicite pour cette écriture distante. Aucun envoi alternatif n’a été utilisé pour contourner le refus. La compilation de cette version sur macOS reste donc non lancée, dans l’attente de cette autorisation.
+Le workflow macOS sépare compilation, tests unitaires natifs et tests UI ; il conserve le `.app` de simulateur dans un ZIP si la compilation réussit. L’utilisateur a explicitement autorisé l’envoi le 5 novembre et l’intégration a été poussée sur `main`.
 
-La page publique du workflow antérieur au commit 594ab56 indique un échec ; les journaux détaillés ne sont pas accessibles avec les accès présents. Les annotations ajoutées au workflow doivent faciliter le diagnostic du prochain build. Une réussite des tests Linux ne remplace ni le chargement Apple de ces fichiers ni la revue du rendu iPhone.
+Le run [42020020366](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42020020366), commit `25d54db`, a exécuté le compilateur Apple et relevé l’absence de l’import de pont `SceneKit.ModelIO`. Cette erreur a été corrigée dans `dae8736`. La vérification de ce correctif est suivie dans le [run 42020297001](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42020297001). Le runner ARM est resté en attente ; le contrôle a été repris sur le runner officiel `macos-15-intel`.
+
+Le [run 42020774343](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42020774343), commit `bc2a6ea`, a réussi la compilation de l’application iOS. Ses tests ont été interrompus volontairement pour améliorer le diagnostic et borner la durée des tests.
+
+Le [run 42022166115](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42022166115), commit `d512ee4`, a également réussi la compilation, le conditionnement et la sauvegarde de l’artefact **BusinessClicker-Simulator-Intel**. Ce ZIP contient le `.app` compilé pour simulateur Intel, non un IPA signé pour iPhone physique. Les étapes de tests unitaires natifs et d’interface doivent encore être suivies séparément ; la présence de l’artefact ne certifie pas leur réussite.
+
+La version antérieure `594ab56` avait également un workflow en échec ; les journaux détaillés étaient inaccessibles avec les accès présents. Les nouvelles annotations du workflow permettent désormais de lire les erreurs de compilation sur la page publique. Une réussite des tests Linux ne remplace ni le chargement Apple de ces fichiers ni la revue du rendu iPhone.
+
+## Correction visible de l’accueil — 6 novembre 2026
+
+Le run `42023352240`, commit `b3fd87a`, a réussi compilation et tests unitaires natifs, dont les trois tests Kenney. Le chargement des modèles, des quatre rigs et des animations est donc vérifié dans SceneKit. Les parcours UI comportaient un échec de recherche du contrôle Concessionnaires ; ce run n’est pas entièrement réussi.
+
+Le commit `57c9a66` modifie réellement l’écran de départ : Ville remplace l’ancien Accueil/Carte, les commandes se superposent à la scène, le bouton de journée est fixé en bas et des bulles projetées ouvrent les données concernées. Le tirage quotidien de 40 % et la fenêtre de décision remplacent le déclenchement systématique tous les trois jours et le bilan forcé.
+
+**57 tests portables passent**. Ils incluent l’enregistrement des jours sans événement, l’impossibilité de relancer un tirage sauvegardé, les décisions uniques, le rattrapage hors ligne et les bulles reliées aux vrais stocks, travaux et événements. Syntaxe Swift, projet Xcode et ressources vérifiés. La compilation Apple, le conditionnement de cette nouvelle interface et ses tests unitaires natifs ont réussi. Les résultats des parcours UI sont suivis séparément dans le [run 42179809019](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42179809019).
+
+La liste explicite des fonctions encore absentes est dans [ETAT_REALISATION.md](ETAT_REALISATION.md). Ne pas confondre cette correction ciblée avec la réalisation intégrale des versions 1.4–1.5 du cahier des charges.

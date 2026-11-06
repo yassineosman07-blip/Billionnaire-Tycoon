@@ -1,8 +1,8 @@
-# Business Clicker — refonte 1.2
+# Business Clicker — version de travail
 
-Jeu iPhone natif en français, iOS 17+, SwiftUI / MVVM, SceneKit, SpriteKit, SwiftData, Swift Charts et AVFoundation. Aucun compte, serveur, publicité ou achat intégré. Les règles de la cible figurent dans le [cahier des charges 1.2](docs/CAHIER_DES_CHARGES.md).
+Jeu iPhone natif en français, iOS 17+, SwiftUI / MVVM, SceneKit, SpriteKit, SwiftData, Swift Charts et AVFoundation. Aucun compte, serveur, publicité ou achat intégré. Les règles de la cible figurent dans le [cahier des charges](docs/CAHIER_DES_CHARGES.md).
 
-**État de livraison :** les fonctionnalités ci-dessous sont implémentées et le moteur est testé sous Linux. La compilation et le rendu iOS doivent encore être vérifiés dans Xcode sur Mac. **Les 32 photographies commerciales restent à intégrer** ; les emplacements manquants affichent explicitement « Photographie indisponible ». Voir [la validation](docs/VALIDATION.md) et [les ressources photographiques manquantes](docs/media/PHOTOGRAPHS.md).
+**État réel :** voir [la liste des fonctions réalisées et manquantes](docs/ETAT_REALISATION.md). Le cahier des charges n’est pas intégralement implémenté. Le commit `57c9a66` remplace l’ancien accueil par la ville en grand, avec bouton de journée fixe, bulles et événements à choix ; ses résultats Xcode sont suivis séparément. Les bâtiments et passants Kenney ont passé leurs tests natifs sur la version précédente. **Les 32 photographies commerciales restent absentes.**
 
 ## Ouvrir le projet
 
@@ -19,7 +19,8 @@ Adapter le simulateur à ceux listés par `xcrun simctl list devices available`.
 ## Ce qui change dans cette version
 
 - **Établissements multiples.** Quarante types d’activités, plusieurs instances du même type et consolidation par enseigne. Chaque adresse a son nom, son quartier, sa parcelle, son niveau, son équipe, son manager, son tarif, ses horaires et sa réserve. Les cafés voisins se partagent une partie de la demande. Les synergies ne se multiplient pas par le nombre de copies.
-- **Ville 3D SceneKit.** Cinq quartiers, 120 parcelles économiques et 16 emplacements immobiliers. Façades pastel, vitrines, auvents, food truck, routes, passages piétons, trottoirs, arbres, lampadaires, ombres et voitures décoratives. Glisser pour déplacer la caméra, pincer pour zoomer et toucher une adresse pour ouvrir sa fiche. Les parcelles occupées ne peuvent pas être achetées deux fois. La géométrie est originale et procédurale ; le rendu exact demande une revue sur iPhone.
+- **Ville 3D SceneKit à l’accueil.** Cinq quartiers, 120 parcelles économiques et 16 emplacements immobiliers. Bâtiments commerciaux et passants humains Kenney, food truck, routes, passages piétons, trottoirs, arbres, lampadaires, ombres et voitures décoratives. Glisser pour déplacer la caméra, pincer pour zoomer et toucher une adresse ou une bulle pour ouvrir sa fiche. Les parcelles occupées ne peuvent pas être achetées deux fois. Le rendu et les performances demandent une revue sur iPhone.
+- **Journée et journal.** Bouton « Passer au lendemain » fixé en bas de la ville, retour de résultat et bilan accessible séparément. Un tirage sauvegardé par jour a 40 % de chance de proposer un événement éligible ; la fenêtre laisse choisir une réponse, décliner ou reporter. Les décisions en attente restent dans le journal.
 - **Boutiques.** Dix catégories, deux enseignes par catégorie et 32 articles, avec des assortiments différenciés. Entrée dans un intérieur 3D, vitrines ou présentations sélectionnables, fiche article, prix, confirmation, puis collection. Les pièces uniques ne peuvent pas être rachetées dans une autre enseigne ; plusieurs véhicules ou logements personnels peuvent être possédés avec des identifiants distincts. Le statut d’un même modèle n’est pas crédité plusieurs fois.
 - **Personnage.** Icône de portrait en haut à gauche des cinq écrans principaux, fiche statistique, finances, réputation, patrimoine, contacts, situation familiale et compteur d’actions. Les 36 portraits sont des illustrations originales de style 3D cartoon, conservées dans un atlas local.
 - **Entourage initial.** Pour les nouvelles parties : mère, père, frère et ex-femme uniquement. Les autres contacts arrivent après des rencontres, jamais automatiquement à une date de déblocage. Les parties migrées conservent leurs anciennes identités et leurs contacts effectivement accessibles ou déjà référencés.
@@ -29,7 +30,7 @@ Adapter le simulateur à ceux listés par `xcrun simctl list devices available`.
 
 ## Première partie
 
-L’introduction conserve le départ de Tasty Crousty : 100 €, food truck déjà payé, logement narratif et stocks de départ. Le clic sur les billets termine une journée ; il ne distribue pas directement d’argent.
+L’introduction conserve le départ de Tasty Crousty : 100 €, food truck déjà payé, logement narratif et stocks de départ. Le bouton « Passer au lendemain » termine une journée ; il ne distribue pas directement d’argent.
 
 Dans **Empire → Tasty Crousty**, régler le menu, les prix et les horaires, puis commander les quatre ingrédients auprès des trois fournisseurs. Une commande du Marché local passée au jour 1 arrive au début du service du jour 2. Les autres établissements utilisent chacun leur réserve de fournitures, commandable dans leur propre fiche. Un manager commande automatiquement lorsque les stocks deviennent insuffisants et que les fonds le permettent.
 
@@ -69,4 +70,14 @@ Les bâtiments commerciaux utilisent désormais les OBJ/MTL/textures de **Kenney
 
 Les fichiers sont livrés dans `BusinessClicker/Resources/Kenney`, conservé comme dossier de ressources pour respecter les chemins relatifs. Les archives CC0 et la provenance figurent dans `AssetsSource/Kenney`. Contrôle local : `python3 scripts/validate-kenney.py`. La conversion requiert Blender et Assimp uniquement pour régénérer les modèles ; l’application ne dépend pas de ces outils.
 
-Le cahier des charges est passé à la version 1.5. Les évolutions décrites comme cibles dans les dernières révisions ne doivent pas toutes être considérées comme déjà implémentées par cette intégration de ressources. Voir `docs/VALIDATION.md` pour les vérifications effectivement exécutées et le build Apple encore bloqué par l’autorisation d’envoi GitHub.
+Le cahier des charges est passé à la version 1.5. Les évolutions décrites comme cibles dans les dernières révisions ne doivent pas toutes être considérées comme déjà implémentées par cette intégration de ressources. Voir `docs/VALIDATION.md` pour les vérifications effectivement exécutées et le résultat du build Apple suivi sur GitHub Actions.
+
+### Build de simulateur
+
+Le [workflow du commit 57c9a66](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42179809019) conserve l’artefact **BusinessClicker-Simulator-Intel** après la compilation. Depuis un compte GitHub autorisé, télécharger cet artefact sur la page du run, puis extraire son ZIP intérieur. Il s’agit d’un `.app` pour simulateur Intel ; pour un Mac Apple Silicon ou un iPhone physique, reconstruire depuis les sources avec Xcode et la destination appropriée. La compilation de cet artefact a réussi ; consulter le workflow et `docs/VALIDATION.md` pour le résultat séparé des tests.
+
+L’artefact **ios-build-and-test-results** conserve les journaux et les bundles `.xcresult`. Ouvrir `UITests.xcresult` avec Xcode pour consulter les parcours et leurs captures, dont « Ville principale Kenney ». Ces captures proviennent du simulateur ; la maquette de direction artistique reste un document distinct.
+
+### Reconnaître la nouvelle interface
+
+Depuis `57c9a66`, le premier onglet s’appelle **Ville**, la scène occupe l’écran principal et le bouton **Passer au lendemain** est fixé en bas. Les comptes détaillés sont dans **Finances**. Si vous voyez encore **Accueil** et **Carte**, votre installation correspond à une version antérieure. Récupérer les sources récentes, ouvrir leur `BusinessClicker.xcodeproj` et reconstruire ; il n’est pas nécessaire de réinitialiser la partie.

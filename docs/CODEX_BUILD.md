@@ -5,6 +5,7 @@ Ce guide accompagne le [cahier des charges 1.5](CAHIER_DES_CHARGES.md). Il décr
 ## 1. Établir l’état réel du projet
 
 - Lire les éventuels `AGENTS.md`, le cahier des charges, le README, les tests et les scripts avant modification.
+- Lire [l’état de réalisation](ETAT_REALISATION.md) et [les résultats de validation](VALIDATION.md). Le commit `57c9a66` fournit déjà la ville principale, les bulles et les événements quotidiens ; conserver ces fonctions et partir des lacunes constatées.
 - Utiliser le checkout existant. Une tâche cloud est déjà isolée : ne pas créer de worktree sauf demande explicite.
 - Vérifier `git status`, conserver les changements de l’utilisateur et identifier ce qui est déjà implémenté, incomplet ou seulement décrit.
 - Examiner les versions de Xcode et Swift, la cible iOS, les ressources et les migrations. Le projet actuel cible iOS 17+, utilise Swift 6 pour le package et le mode de langage Swift 5 pour l’application.
