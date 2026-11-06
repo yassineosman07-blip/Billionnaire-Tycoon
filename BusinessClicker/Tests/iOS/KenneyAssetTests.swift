@@ -2,6 +2,7 @@ import XCTest
 import SceneKit
 import ModelIO
 import UIKit
+import Metal
 @testable import BusinessClicker
 
 @MainActor final class KenneyAssetTests: XCTestCase {
@@ -35,6 +36,7 @@ import UIKit
         XCTAssertEqual(World().social.known,[0,1,2,3])
     }
     func testLiveCityRendersMovementAndPedestrianRouteTurns() async throws {
+        print("testLiveCity started with Metal device: \(MTLCreateSystemDefaultDevice()?.name ?? "none")")
         let scene=try CitySceneBuilder.make(World().businesses,properties:[],reduced:false)
         let car=try XCTUnwrap(scene.rootNode.childNode(withName:"ambient-car-0",recursively:false))
         let pedestrian=try XCTUnwrap(scene.rootNode.childNode(withName:"ambient-pedestrian-0",recursively:false))
