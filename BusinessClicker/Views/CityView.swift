@@ -122,6 +122,8 @@ struct CityViewport: UIViewRepresentable {
     func makeUIView(context: Context) -> SCNView {
         let view = PausableCityView(frame: .zero, options: nil); view.backgroundColor = .clear; view.antialiasingMode = .multisampling2X; view.preferredFramesPerSecond = 30
         view.isPlaying = true; view.autoenablesDefaultLighting = false; view.allowsCameraControl = false
+        // Expose the interactive markers, rather than the renderer's internal view tree.
+        view.isAccessibilityElement = false; view.accessibilityElements = []
         let pan=UIPanGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.pan(_:)))
         let pinch=UIPinchGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.pinch(_:)))
         let tap=UITapGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.tap(_:)))
@@ -167,6 +169,9 @@ struct CityViewport: UIViewRepresentable {
         var notices: [CityNotice] = []
         var bubbles: [String:UIButton] = [:]
         var districtLabels: [UILabel] = []
+        var projectedBounds = CGRect.null
+        var projectedCamera = SCNMatrix4Identity
+        var projectedZoom: Double = -1
         init(select: @escaping (Int?, Int?, Int?) -> Void) { self.select = select }
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
             var target=touch.view
@@ -200,11 +205,17 @@ struct CityViewport: UIViewRepresentable {
                     label.sizeToFit();label.frame.size.width += 18;label.frame.size.height=27;view.addSubview(label);districtLabels.append(label)
                 }
             }
+            view.accessibilityElements = notices.compactMap { bubbles[$0.id] }
+            projectedBounds = .null
             if displayLink==nil { let link=CADisplayLink(target:self,selector:#selector(projectNotices));link.preferredFramesPerSecond=30;link.add(to:.main,forMode:.common);displayLink=link }
             projectNotices()
         }
         @objc func projectNotices() {
             guard let view,view.window != nil,let scene=view.scene,!scene.isPaused else { return }
+            let camera = view.pointOfView?.presentation.worldTransform ?? SCNMatrix4Identity
+            let zoom = view.pointOfView?.presentation.camera?.orthographicScale ?? 0
+            guard projectedBounds != view.bounds || projectedZoom != zoom || !SCNMatrix4EqualToMatrix4(projectedCamera,camera) else { return }
+            projectedBounds = view.bounds; projectedCamera = camera; projectedZoom = zoom
             var occupied: [CGRect] = []
             for item in notices {
                 guard let button=bubbles[item.id] else { continue }
@@ -213,15 +224,18 @@ struct CityViewport: UIViewRepresentable {
                 guard let node=view.scene?.rootNode.childNode(withName:name,recursively:false) else { button.isHidden=true;continue }
                 let height=node.boundingBox.max.y
                 let location=node.convertPosition(SCNVector3(0,height+2,0),to:nil);let point=view.projectPoint(location)
-                button.center=CGPoint(x:CGFloat(point.x),y:CGFloat(point.y)-10)
+                let center=CGPoint(x:CGFloat(point.x),y:CGFloat(point.y)-10)
+                if button.center != center { button.center=center }
                 let box=button.frame.insetBy(dx:-5,dy:-6)
                 let obscured = point.z < 0 || point.z > 1 || !view.bounds.insetBy(dx:8,dy:90).contains(button.center) || occupied.contains { $0.intersects(box) }
-                button.isHidden=obscured;if !obscured { occupied.append(box) }
+                if button.isHidden != obscured { button.isHidden=obscured };if !obscured { occupied.append(box) }
             }
             for (id,label) in districtLabels.enumerated() {
                 let center=CitySceneBuilder.centers[id];let point=view.projectPoint(SCNVector3(center.0,0.5,center.1-21))
-                label.center=CGPoint(x:CGFloat(point.x),y:CGFloat(point.y))
-                label.isHidden = (view.pointOfView?.camera?.orthographicScale ?? 0)<45 || point.z<0 || point.z>1 || !view.bounds.insetBy(dx:15,dy:100).contains(label.center)
+                let center=CGPoint(x:CGFloat(point.x),y:CGFloat(point.y))
+                if label.center != center { label.center=center }
+                let hidden = zoom<45 || point.z<0 || point.z>1 || !view.bounds.insetBy(dx:15,dy:100).contains(label.center)
+                if label.isHidden != hidden { label.isHidden=hidden }
             }
         }
         @objc func bubbleTapped(_ sender: UIButton) {

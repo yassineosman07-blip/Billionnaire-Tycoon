@@ -53,8 +53,13 @@ jobs:
           name: ios-build-and-test-results
           path: Validation/
   ios-ui:
+    name: ios-ui-${{ matrix.journey }}
     runs-on: macos-15-intel
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        journey: [testFirstServiceAndPersistence, testShopInteriorAndProductDetails, testThreeActionsPersistAcrossRelaunch]
     steps:
       - uses: actions/checkout@v4
       - name: Select an available iPhone simulator
@@ -67,12 +72,12 @@ jobs:
         run: |
           set +e
           set -o pipefail
-          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerUITests -test-timeouts-enabled YES -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 -parallel-testing-enabled NO -resultBundlePath Validation/UITests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/ui-tests.log | python3 -u .github/scripts/stream-xcode-progress.py
+          xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker -destination "platform=iOS Simulator,id=$DEVICE_ID" -derivedDataPath DerivedData -only-testing:BusinessClickerUITests/BusinessClickerUITests/${{ matrix.journey }} -test-timeouts-enabled YES -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 -parallel-testing-enabled NO -resultBundlePath Validation/UITests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee Validation/ui-tests.log | python3 -u .github/scripts/stream-xcode-progress.py
           TEST_STATUS=${PIPESTATUS[0]}
           python3 .github/scripts/report-xcode-errors.py Validation/ui-tests.log
           exit "$TEST_STATUS"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ios-ui-test-results
+          name: ios-ui-test-results-${{ matrix.journey }}
           path: Validation/

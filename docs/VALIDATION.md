@@ -87,3 +87,9 @@ Le commit `57c9a66` modifie réellement l’écran de départ : Ville remplace l
 La liste explicite des fonctions encore absentes est dans [ETAT_REALISATION.md](ETAT_REALISATION.md). Ne pas confondre cette correction ciblée avec la réalisation intégrale des versions 1.4–1.5 du cahier des charges.
 
 Le run `42179809019` a terminé avec les tests UI en échec et un dépassement du délai global de 25 minutes. Le contrôle du jour cherchait la ville pendant sa modale d’événement ; le contrôle boutique imposait un type Button aux liens SwiftUI. Les requêtes sont corrigées, la sélection Collection est explicitement vérifiée, et les parcours disposent désormais d’un job macOS indépendant. Leurs résultats ne doivent pas être annoncés comme réussis avant la nouvelle exécution. Les échecs conservent une capture, la hiérarchie d’accessibilité et des annotations ciblées.
+
+Le [run 42183108545](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42183108545), commit `7e7f1f0`, a réussi ses jobs `core` et `ios` (compilation, artefact et tests unitaires natifs). Le job `ios-ui` est distinct ; sa validation ne découle pas de ces deux réussites.
+
+Le job `ios-ui` du run `42183108545` a dépassé sa limite de 25 minutes et a été annulé. Les deux autres jobs sont entièrement réussis. La vérification des parcours UI reste donc non validée ; aucune réussite globale ni revue visuelle sur appareil n’est annoncée.
+
+Le diagnostic final du job UI relève des délais de capture d’accessibilité dès l’ouverture de la ville (lignes 25 et 55 du test), avant les parcours proprement dits. La scène est corrigée pour exposer uniquement ses marqueurs interactifs et éviter les mises à jour UIKit à chaque image quand la caméra et le cadrage sont immobiles. Chaque parcours est désormais lancé séparément pour conserver son propre diagnostic. Cette correction de rendu nécessite une nouvelle vérification native.
