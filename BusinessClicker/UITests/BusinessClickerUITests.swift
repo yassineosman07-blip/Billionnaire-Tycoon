@@ -40,7 +40,10 @@ final class BusinessClickerUITests: XCTestCase {
         app.tabBars.buttons["Empire"].tap()
         XCTAssertTrue(app.staticTexts["Tasty Crousty"].firstMatch.waitForExistence(timeout: 3))
         app.terminate(); app.launchArguments = ["--ui-testing"]; app.launch()
+        let restoredEvent=element(app,"event-defer")
+        if restoredEvent.waitForExistence(timeout:2) { restoredEvent.tap() }
         XCTAssertTrue(app.tabBars.buttons["Ville"].waitForExistence(timeout: 5))
+        XCTAssertEqual(element(app,"city-day").label,"JOUR 2")
         XCTAssertFalse(app.buttons["Ouvrir Tasty Crousty"].exists)
         let screenshot = XCTAttachment(screenshot: app.screenshot()); screenshot.lifetime = .keepAlways; add(screenshot)
     }
