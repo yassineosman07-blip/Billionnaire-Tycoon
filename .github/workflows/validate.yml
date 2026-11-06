@@ -47,6 +47,21 @@ jobs:
           TEST_STATUS=${PIPESTATUS[0]}
           python3 .github/scripts/report-xcode-errors.py Validation/unit-tests.log
           exit "$TEST_STATUS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-build-and-test-results
+          path: Validation/
+  ios-ui:
+    runs-on: macos-15-intel
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select an available iPhone simulator
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; print(next(d["udid"] for runtime,ds in json.load(sys.stdin)["devices"].items() if "iOS" in runtime for d in ds if d["name"].startswith("iPhone")))')
+          echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+          mkdir -p Validation
       - name: Test iPhone user journeys
         shell: bash
         run: |
@@ -59,5 +74,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ios-build-and-test-results
+          name: ios-ui-test-results
           path: Validation/

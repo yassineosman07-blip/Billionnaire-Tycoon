@@ -27,6 +27,6 @@ Le cahier des charges définit une cible. Il ne constitue pas une liste de fonct
 
 - **57 tests portables réussis**, dont six ajoutés pour les tirages quotidiens et les bulles.
 - Le [run 42023352240](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42023352240) compile la version précédente, passe les tests unitaires natifs dont Kenney, mais échoue sur une navigation boutique. Il ne faut pas le présenter comme entièrement vert.
-- La nouvelle interface a réussi la compilation Xcode, le conditionnement de son `.app` de simulateur et les tests unitaires natifs ; les parcours UI sont suivis dans le [run 42179809019](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42179809019). Le résultat du build et des parcours doit être lu séparément des tests Linux.
+- La nouvelle interface a réussi la compilation Xcode, le conditionnement de son `.app` de simulateur et les tests unitaires natifs ; les parcours UI sont suivis dans le [run 42179809019](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42179809019). Ce run a échoué sur deux contrôles UI et dépassé son délai global. Les requêtes et l’isolation du job UI sont corrigées pour la prochaine exécution ; les parcours restent à valider.
 
 La maquette générée précédemment est une référence de direction artistique, pas une capture d’application. Aucun rendu « pixel par pixel » ni niveau de fluidité sur iPhone n’est certifié par ce document.

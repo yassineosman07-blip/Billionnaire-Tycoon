@@ -1,6 +1,21 @@
 import XCTest
 
 final class BusinessClickerUITests: XCTestCase {
+    private func element(_ app: XCUIApplication, _ identifier: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+    override func tearDownWithError() throws {
+        if testRun?.hasSucceeded == false {
+            let app=XCUIApplication()
+            let tree=app.debugDescription
+            let hierarchy=XCTAttachment(string:tree);hierarchy.name="Hiérarchie au moment de l’échec";hierarchy.lifetime = .keepAlways;add(hierarchy)
+            for identifier in ["city-day","event-defer","shop-category-0","Collection","Votre signature"] {
+                let lines=tree.split(separator:"\n").filter { $0.contains(identifier) }.prefix(4).joined(separator:" | ")
+                print("UI_DIAGNOSTIC \(identifier): \(lines.isEmpty ? "absent" : lines)")
+            }
+            let shot=XCTAttachment(screenshot:app.screenshot());shot.name="Écran au moment de l’échec";shot.lifetime = .keepAlways;add(shot)
+        }
+    }
     func testFirstServiceAndPersistence() throws {
         let app = XCUIApplication(); app.launchArguments = ["--ui-testing", "--ui-testing-reset"]; app.launch()
         if app.buttons["Continuer"].waitForExistence(timeout: 5) {
@@ -10,9 +25,14 @@ final class BusinessClickerUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Ville"].waitForExistence(timeout: 5))
         let cityShot=XCTAttachment(screenshot:app.screenshot());cityShot.name="Ville principale Kenney";cityShot.lifetime = .keepAlways;add(cityShot)
         app.buttons["advance-day"].tap()
-        let dayChanged=XCTNSPredicateExpectation(predicate:NSPredicate(format:"label == %@","JOUR 2"),object:app.staticTexts["city-day"])
-        XCTAssertEqual(XCTWaiter.wait(for:[dayChanged],timeout:10),.completed)
-        if app.buttons["event-defer"].waitForExistence(timeout:2) { app.buttons["event-defer"].tap() }
+        let day=element(app,"city-day");let deferred=element(app,"event-defer")
+        // A presented event hides the city's accessibility tree until dismissed.
+        let completed=XCTNSPredicateExpectation(predicate:NSPredicate { _,_ in
+            deferred.exists || (day.exists && day.label == "JOUR 2")
+        },object:nil)
+        XCTAssertEqual(XCTWaiter.wait(for:[completed],timeout:20),.completed)
+        if deferred.waitForExistence(timeout:2) { deferred.tap() }
+        XCTAssertEqual(day.label,"JOUR 2")
         app.buttons["Bilan"].tap()
         XCTAssertTrue(app.navigationBars["Bilans quotidiens"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Chiffre d’affaires"].firstMatch.exists)
@@ -56,12 +76,15 @@ extension BusinessClickerUITests {
         XCTAssertFalse(bar.isEnabled)
     }
     func testShopInteriorAndProductDetails() throws {
-        let app = freshGame(); app.tabBars.buttons["Patrimoine"].tap(); app.buttons["Collection"].tap()
-        let category = app.buttons["shop-category-0"]
+        let app = freshGame(); app.tabBars.buttons["Patrimoine"].tap()
+        let collection=app.segmentedControls.buttons["Collection"]
+        XCTAssertTrue(collection.waitForExistence(timeout:5));collection.tap()
+        XCTAssertTrue(app.staticTexts["Votre signature"].waitForExistence(timeout:5))
+        let category = element(app,"shop-category-0")
         for _ in 0..<4 { if category.isHittable { break }; app.swipeUp() }
-        XCTAssertTrue(category.waitForExistence(timeout:5));category.tap();app.buttons["shop-0"].tap()
+        XCTAssertTrue(category.waitForExistence(timeout:5));category.tap();element(app,"shop-0").tap()
         XCTAssertTrue(app.navigationBars["Garage Avenue"].waitForExistence(timeout: 5))
-        let item = app.buttons["shop-item-3"]
+        let item = element(app,"shop-item-3")
         for _ in 0..<5 { if item.isHittable { break }; app.swipeUp() }
         item.tap()
         XCTAssertTrue(app.navigationBars["Renault Clio IV"].waitForExistence(timeout: 3))

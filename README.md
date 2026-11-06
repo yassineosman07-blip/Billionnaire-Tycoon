@@ -76,7 +76,7 @@ Le cahier des charges est passé à la version 1.5. Les évolutions décrites co
 
 Le [workflow du commit 57c9a66](https://github.com/yassineosman07-blip/Billionnaire-Tycoon/actions/runs/42179809019) conserve l’artefact **BusinessClicker-Simulator-Intel** après la compilation. Depuis un compte GitHub autorisé, télécharger cet artefact sur la page du run, puis extraire son ZIP intérieur. Il s’agit d’un `.app` pour simulateur Intel ; pour un Mac Apple Silicon ou un iPhone physique, reconstruire depuis les sources avec Xcode et la destination appropriée. La compilation de cet artefact a réussi ; consulter le workflow et `docs/VALIDATION.md` pour le résultat séparé des tests.
 
-L’artefact **ios-build-and-test-results** conserve les journaux et les bundles `.xcresult`. Ouvrir `UITests.xcresult` avec Xcode pour consulter les parcours et leurs captures, dont « Ville principale Kenney ». Ces captures proviennent du simulateur ; la maquette de direction artistique reste un document distinct.
+L’artefact **ios-build-and-test-results** conserve les journaux de compilation et les tests unitaires. Les parcours sont désormais exécutés dans un job indépendant et conservés dans **ios-ui-test-results** ; ouvrir son `UITests.xcresult` avec Xcode pour consulter les parcours et leurs captures, dont « Ville principale Kenney ». Ces captures proviennent du simulateur ; la maquette de direction artistique reste un document distinct.
 
 ### Reconnaître la nouvelle interface
 
