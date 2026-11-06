@@ -154,7 +154,7 @@ struct CityViewport: UIViewRepresentable {
             let oldRig = view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false)?.position
             let oldZoom = view.pointOfView?.camera?.orthographicScale
             do {
-                view.scene = try CitySceneBuilder.make(businesses, properties: properties, reduced: reduced)
+                view.scene = GameRuntime.prepareScene(try CitySceneBuilder.make(businesses, properties: properties, reduced: reduced))
                 view.viewWithTag(7281)?.removeFromSuperview()
             } catch {
                 view.scene = nil

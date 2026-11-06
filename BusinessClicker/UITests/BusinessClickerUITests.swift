@@ -5,7 +5,7 @@ final class BusinessClickerUITests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
     override func tearDownWithError() throws {
-        if testRun?.hasSucceeded == false {
+        if (testRun?.failureCount ?? 0) > 0 {
             let app=XCUIApplication()
             let tree=app.debugDescription
             let hierarchy=XCTAttachment(string:tree);hierarchy.name="Hiérarchie au moment de l’échec";hierarchy.lifetime = .keepAlways;add(hierarchy)

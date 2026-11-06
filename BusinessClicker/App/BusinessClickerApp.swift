@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import SceneKit
 
 enum GameRuntime {
     static var isUITesting: Bool {
@@ -8,6 +9,15 @@ enum GameRuntime {
         #else
         return false
         #endif
+    }
+    @MainActor static func prepareScene(_ scene: SCNScene) -> SCNScene {
+        guard isUITesting else { return scene }
+        scene.rootNode.enumerateHierarchy { node,_ in
+            let pose=node.presentation.transform
+            node.removeAllActions();node.removeAllAnimations();node.transform=pose
+        }
+        scene.isPaused=true
+        return scene
     }
 }
 

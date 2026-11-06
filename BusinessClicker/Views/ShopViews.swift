@@ -114,14 +114,14 @@ struct ShopRoom: UIViewRepresentable {
     func makeUIView(context: Context) -> SCNView {
         let view=SCNView(frame: .zero, options: nil);view.antialiasingMode = .multisampling2X;view.preferredFramesPerSecond=30
         view.isAccessibilityElement=false;view.accessibilityElementsHidden=true
-        view.scene=ShopSceneBuilder.make(shop);view.pointOfView=view.scene?.rootNode.childNode(withName:"shopCamera",recursively:false)
+        view.scene=GameRuntime.prepareScene(ShopSceneBuilder.make(shop));view.pointOfView=view.scene?.rootNode.childNode(withName:"shopCamera",recursively:false)
         if GameRuntime.isUITesting { view.isPlaying=false;view.scene?.isPaused=true }
         view.addGestureRecognizer(UITapGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.tap(_:))))
         return view
     }
     func updateUIView(_ view: SCNView, context: Context) {
         context.coordinator.select=select
-        if context.coordinator.shopID != shop.id { view.scene=ShopSceneBuilder.make(shop);view.pointOfView=view.scene?.rootNode.childNode(withName:"shopCamera",recursively:false);context.coordinator.shopID=shop.id }
+        if context.coordinator.shopID != shop.id { view.scene=GameRuntime.prepareScene(ShopSceneBuilder.make(shop));view.pointOfView=view.scene?.rootNode.childNode(withName:"shopCamera",recursively:false);context.coordinator.shopID=shop.id }
         if GameRuntime.isUITesting { view.isPlaying=false;view.scene?.isPaused=true }
     }
     static func dismantleUIView(_ view: SCNView, coordinator: Coordinator) { view.scene=nil }

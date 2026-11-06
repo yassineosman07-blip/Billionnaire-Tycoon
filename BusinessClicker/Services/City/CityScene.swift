@@ -56,9 +56,9 @@ import UIKit
         }
         if !reduced {
             for i in 0..<10 {
-                let vehicle = car(i); let z: Float = i % 2 == 0 ? 10 : -45
+                let vehicle = car(i); vehicle.name = "ambient-car-\(i)"; let z: Float = i % 2 == 0 ? 10 : -45
                 vehicle.position = SCNVector3(-85 + Float(i * 10),0.65,z)
-                vehicle.runAction(.repeatForever(.sequence([.move(to: SCNVector3(28,0.65,z), duration: Double(22 + i)), .run { node in node.position.x = -85 }])))
+                vehicle.runAction(.repeatForever(.sequence([.move(to: SCNVector3(28,0.65,z), duration: Double(22 + i)), .move(to: SCNVector3(-85,0.65,z), duration: 0)])), forKey: "ambient-route")
                 scene.rootNode.addChildNode(vehicle)
             }
         }

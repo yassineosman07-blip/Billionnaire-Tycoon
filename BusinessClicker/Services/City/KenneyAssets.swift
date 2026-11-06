@@ -55,7 +55,8 @@ import UIKit
     /// Each pedestrian loads an independent skeleton. Skinned-node clones can share bone references.
     static func pedestrian(female: Bool, moving: Bool) throws -> SCNNode {
         let name = "\(female ? "female" : "male")-\(moving ? "run" : "idle").dae"
-        let scene = try SCNScene(url: url(name, folder: "Pedestrians"), options: [.animationImportPolicy: SCNSceneSource.AnimationImportPolicy.playRepeatedly])
+        let policy:SCNSceneSource.AnimationImportPolicy = GameRuntime.isUITesting ? .doNotPlay : .playRepeatedly
+        let scene = try SCNScene(url: url(name, folder: "Pedestrians"), options: [.animationImportPolicy: policy])
         let content = SCNNode()
         for child in scene.rootNode.childNodes { content.addChildNode(child) }
         let b = content.boundingBox; let height = b.max.y - b.min.y
@@ -65,7 +66,7 @@ import UIKit
         let scale = Float(1.65) / height; container.scale = SCNVector3(scale,scale,scale)
         content.enumerateChildNodes { node, _ in
             for key in node.animationKeys {
-                if let player = node.animationPlayer(forKey: key) { player.animation.repeatCount = .greatestFiniteMagnitude; player.speed = moving ? 0.65 : 1; player.play() }
+                if let player = node.animationPlayer(forKey: key) { player.animation.repeatCount = .greatestFiniteMagnitude; player.speed = moving ? 0.65 : 1; if !GameRuntime.isUITesting { player.play() } }
             }
             for material in node.geometry?.materials ?? [] {
                 material.isDoubleSided = true; material.diffuse.magnificationFilter = .nearest
@@ -90,10 +91,10 @@ import UIKit
                 let duration = Double(36 + index * 2)
                 carrier.runAction(.repeatForever(.sequence([
                     .move(to: index % 2 == 0 ? end : start, duration: duration),
-                    .run { _ in figure.eulerAngles.y += .pi },
+                    .rotateBy(x:0,y:.pi,z:0,duration:0),
                     .move(to: index % 2 == 0 ? start : end, duration: duration),
-                    .run { _ in figure.eulerAngles.y += .pi }
-                ])))
+                    .rotateBy(x:0,y:.pi,z:0,duration:0)
+                ])), forKey: "ambient-route")
             }
             root.addChildNode(carrier)
         }
