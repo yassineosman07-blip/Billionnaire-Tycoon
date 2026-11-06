@@ -231,7 +231,7 @@ struct CityViewport: UIViewRepresentable {
                 if button.isHidden != obscured { button.isHidden=obscured };if !obscured { occupied.append(box) }
             }
             for (id,label) in districtLabels.enumerated() {
-                let center=CitySceneBuilder.centers[id];let point=view.projectPoint(SCNVector3(center.0,0.5,center.1-21))
+                let districtCenter=CitySceneBuilder.centers[id];let point=view.projectPoint(SCNVector3(districtCenter.0,0.5,districtCenter.1-21))
                 let center=CGPoint(x:CGFloat(point.x),y:CGFloat(point.y))
                 if label.center != center { label.center=center }
                 let hidden = zoom<45 || point.z<0 || point.z>1 || !view.bounds.insetBy(dx:15,dy:100).contains(label.center)
