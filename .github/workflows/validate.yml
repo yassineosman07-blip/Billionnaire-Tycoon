@@ -87,3 +87,24 @@ jobs:
         with:
           name: ios-ui-test-results-${{ matrix.journey }}
           path: Validation/
+  city-preview:
+    needs: ios-ui
+    if: always()
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ios-ui-test-results-testFirstServiceAndPersistence
+          path: Preview
+      - name: Expose the native preview for review
+        run: |
+          python3 - <<'PY'
+          import base64
+          from pathlib import Path
+          encoded=base64.b64encode(Path('Preview/CityPreview.jpg').read_bytes()).decode('ascii')
+          parts=[encoded[i:i+3500] for i in range(0,len(encoded),3500)]
+          if len(parts)>10:raise SystemExit('Preview exceeds annotation budget')
+          for i,part in enumerate(parts,1):
+              print(f'::notice title=Native city capture {i}/{len(parts)}::NATIVE_CITY_JPEG_{i}_{len(parts)}:'+part)
+          PY

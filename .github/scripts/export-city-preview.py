@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Publish a small screenshot from our fresh UI-test game as a CI annotation."""
-import base64
 import json
 from pathlib import Path
 import subprocess
@@ -40,4 +39,4 @@ for dimension in [720, 540, 400, 320, 240]:
 data = output.read_bytes()
 if len(data) > 22000:
     raise SystemExit('Aperçu trop volumineux pour une annotation ; fichier conservé dans les artefacts.')
-print('::notice title=Native city capture::NATIVE_CITY_PREVIEW_JPEG:' + base64.b64encode(data).decode('ascii'))
+print('::notice title=Native city capture::Native preview saved to CityPreview.jpg; see the city-preview job and artifact.')

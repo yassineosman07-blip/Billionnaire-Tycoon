@@ -33,14 +33,19 @@ struct PatrimonyView: View {
                     }
                 }
             } else {
+                HStack {
+                    Text("\(game.world.collectionCount) objets").foregroundStyle(.secondary)
+                    Spacer()
+                    NavigationLink { PersonalCollectionView() } label: { Label("Ma collection",systemImage:"diamond.fill").frame(minHeight:44) }.buttonStyle(.plain)
+                }.font(.subheadline)
+                ForEach(ShopCatalog.categories) { category in NavigationLink { ShopCategoryView(category: category.id) } label: {
+                    HStack { IconBadge(symbol: category.symbol, color: .orange); Text(category.name).font(.headline); Spacer(); Image(systemName: "chevron.right") }.padding(14).background(Palette.surface, in: RoundedRectangle(cornerRadius: 18))
+                }.buttonStyle(.plain).accessibilityIdentifier("shop-category-\(category.id)") }
                 Panel("Votre signature") {
                     HStack { Metric(label: "Collection", value: "\(game.world.collectionCount) objets", symbol: "diamond.fill"); Metric(label: "Statut social", value: "\(game.world.status)", symbol: "sparkles") }
                     NavigationLink { ShoppingDistrictView() } label: { Label("Entrer dans le quartier des boutiques", systemImage: "storefront.fill") }
                     NavigationLink { PersonalCollectionView() } label: { Label("Voir ma collection", systemImage: "diamond.fill") }
                 }
-                ForEach(ShopCatalog.categories) { category in NavigationLink { ShopCategoryView(category: category.id) } label: {
-                    HStack { IconBadge(symbol: category.symbol, color: .orange); Text(category.name).font(.headline); Spacer(); Image(systemName: "chevron.right") }.padding(14).background(Palette.surface, in: RoundedRectangle(cornerRadius: 18))
-                }.buttonStyle(.plain).accessibilityIdentifier("shop-category-\(category.id)") }
             }
         }.navigationTitle("Votre patrimoine")
     }

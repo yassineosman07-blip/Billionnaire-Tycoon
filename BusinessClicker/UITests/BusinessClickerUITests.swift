@@ -82,10 +82,9 @@ extension BusinessClickerUITests {
         let app = freshGame(); app.tabBars.buttons["Patrimoine"].tap()
         let collection=app.segmentedControls.buttons["Collection"]
         XCTAssertTrue(collection.waitForExistence(timeout:5));collection.tap()
-        XCTAssertTrue(app.staticTexts["Votre signature"].waitForExistence(timeout:5))
         let category = element(app,"shop-category-0")
-        for _ in 0..<4 { if category.isHittable { break }; app.swipeUp() }
-        XCTAssertTrue(category.waitForExistence(timeout:5));category.tap();element(app,"shop-0").tap()
+        XCTAssertTrue(category.waitForExistence(timeout:5));XCTAssertTrue(category.isHittable)
+        category.tap();element(app,"shop-0").tap()
         XCTAssertTrue(app.navigationBars["Garage Avenue"].waitForExistence(timeout: 5))
         let item = element(app,"shop-item-3")
         for _ in 0..<5 { if item.isHittable { break }; app.swipeUp() }
