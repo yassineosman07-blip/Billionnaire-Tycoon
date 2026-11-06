@@ -21,8 +21,7 @@ struct CityView: View {
                     else if let property { selection = .property(property) }
                     else if let plot { selection = .plot(plot) }
                     game.feedback.play("click", settings: game.world.settings)
-                }.accessibilityElement(children: .contain).accessibilityIdentifier("city-viewport")
-                .accessibilityLabel("Ville 3D. Déplacez avec un doigt, pincez pour zoomer, touchez un bâtiment ou sa bulle.")
+                }.accessibilityHidden(true)
             VStack(spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -45,7 +44,7 @@ struct CityView: View {
                     Spacer()
                     VStack(spacing: 12) {
                         Button { focusToken += 1 } label: { Image(systemName: "scope").font(.title2).frame(width: 44,height: 44) }.accessibilityLabel("Recentrer sur Tasty Crousty")
-                        Button { listOpen = true } label: { Image(systemName: "list.bullet").font(.title2).frame(width: 44,height: 44) }.accessibilityLabel("Liste des lieux")
+                        Button { listOpen = true } label: { Image(systemName: "list.bullet").font(.title2).frame(width: 44,height: 44) }.accessibilityLabel("Liste des lieux").accessibilityHint("Commerces, quartiers et alertes de stocks, livraisons, travaux et événements.")
                     }.buttonStyle(.plain).padding(8).background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:18))
                 }
             }.padding(.horizontal,14).padding(.top,8).padding(.bottom,10)
@@ -92,6 +91,19 @@ struct CityPlaceView: View {
 struct CityPlacesList: View {
     @EnvironmentObject private var game: GameViewModel
     var body: some View { Screen {
+        if !CityStatus.notices(game.world).isEmpty {
+            Panel("À faire en ville") {
+                ForEach(CityStatus.notices(game.world)) { notice in
+                    NavigationLink {
+                        switch notice.target {
+                        case .business(let id): BusinessDetailView(id:id)
+                        case .property(let id): PropertyDetailView(id:id)
+                        case .event(let id): EventDetailView(id:id)
+                        }
+                    } label: { Label(notice.title,systemImage:notice.symbol) }
+                }
+            }
+        }
         ForEach(Catalog.districts) { d in Panel(d.name) {
             LineItem(label:"Popularité / concurrence",value:"\(Int(d.popularity*100)) / \(Int(d.competition*100))")
             ForEach(game.world.businesses.filter { $0.districtID == d.id }) { b in NavigationLink(b.name) { BusinessDetailView(id:b.id) } }
@@ -122,8 +134,8 @@ struct CityViewport: UIViewRepresentable {
     func makeUIView(context: Context) -> SCNView {
         let view = PausableCityView(frame: .zero, options: nil); view.backgroundColor = .clear; view.antialiasingMode = .multisampling2X; view.preferredFramesPerSecond = 30
         view.isPlaying = true; view.autoenablesDefaultLighting = false; view.allowsCameraControl = false
-        // Expose the interactive markers, rather than the renderer's internal view tree.
-        view.isAccessibilityElement = false; view.accessibilityElements = []
+        // SwiftUI's list of places exposes equivalent actions without traversing SceneKit.
+        view.isAccessibilityElement = false; view.accessibilityElementsHidden = true
         let pan=UIPanGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.pan(_:)))
         let pinch=UIPinchGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.pinch(_:)))
         let tap=UITapGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.tap(_:)))
@@ -205,7 +217,6 @@ struct CityViewport: UIViewRepresentable {
                     label.sizeToFit();label.frame.size.width += 18;label.frame.size.height=27;view.addSubview(label);districtLabels.append(label)
                 }
             }
-            view.accessibilityElements = notices.compactMap { bubbles[$0.id] }
             projectedBounds = .null
             if displayLink==nil { let link=CADisplayLink(target:self,selector:#selector(projectNotices));link.preferredFramesPerSecond=30;link.add(to:.main,forMode:.common);displayLink=link }
             projectNotices()
