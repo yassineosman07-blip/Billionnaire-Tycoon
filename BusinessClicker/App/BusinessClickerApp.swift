@@ -1,6 +1,16 @@
 import SwiftUI
 import SwiftData
 
+enum GameRuntime {
+    static var isUITesting: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("--ui-testing")
+        #else
+        return false
+        #endif
+    }
+}
+
 @main struct BusinessClickerApp: App {
     private let container: ModelContainer?
     private let startupError: String?
@@ -62,7 +72,7 @@ struct GameRoot: View {
         .environmentObject(game)
         .buttonStyle(ArcadeButtonStyle())
         .transaction { transaction in
-            if reduceMotion || game.world.settings.reducedMotion { transaction.animation = nil; transaction.disablesAnimations = true }
+            if reduceMotion || game.world.settings.reducedMotion || GameRuntime.isUITesting { transaction.animation = nil; transaction.disablesAnimations = true }
         }
         .confirmationDialog("Effacer la sauvegarde existante et recommencer ?", isPresented: $resetCorruptSave, titleVisibility: .visible) {
             Button("Effacer et recommencer", role: .destructive) { game.reset() }

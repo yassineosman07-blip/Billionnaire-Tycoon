@@ -39,7 +39,7 @@ struct ShopInteriorView: View {
     var body: some View {
         Screen {
             Text(shop.subtitle).font(.subheadline).foregroundStyle(.secondary)
-            ShopRoom(shop: shop) { selectedItem = $0 }.frame(height: 290).clipShape(RoundedRectangle(cornerRadius: 22))
+            ShopRoom(shop: shop) { selectedItem = $0 }.frame(height: 290).clipShape(RoundedRectangle(cornerRadius: 22)).accessibilityHidden(true)
             Text("Touchez une présentation pour consulter son article.").font(.caption).foregroundStyle(.secondary)
             ForEach(shop.offers, id: \.self) { id in
                 NavigationLink { ItemDetailView(shopID: shopID, itemID: id) } label: {
@@ -113,13 +113,16 @@ struct ShopRoom: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(select: select) }
     func makeUIView(context: Context) -> SCNView {
         let view=SCNView(frame: .zero, options: nil);view.antialiasingMode = .multisampling2X;view.preferredFramesPerSecond=30
+        view.isAccessibilityElement=false;view.accessibilityElementsHidden=true
         view.scene=ShopSceneBuilder.make(shop);view.pointOfView=view.scene?.rootNode.childNode(withName:"shopCamera",recursively:false)
+        if GameRuntime.isUITesting { view.isPlaying=false;view.scene?.isPaused=true }
         view.addGestureRecognizer(UITapGestureRecognizer(target:context.coordinator,action:#selector(Coordinator.tap(_:))))
         return view
     }
     func updateUIView(_ view: SCNView, context: Context) {
         context.coordinator.select=select
         if context.coordinator.shopID != shop.id { view.scene=ShopSceneBuilder.make(shop);view.pointOfView=view.scene?.rootNode.childNode(withName:"shopCamera",recursively:false);context.coordinator.shopID=shop.id }
+        if GameRuntime.isUITesting { view.isPlaying=false;view.scene?.isPaused=true }
     }
     static func dismantleUIView(_ view: SCNView, coordinator: Coordinator) { view.scene=nil }
     @MainActor final class Coordinator: NSObject {

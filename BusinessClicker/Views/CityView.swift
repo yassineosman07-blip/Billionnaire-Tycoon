@@ -133,7 +133,8 @@ struct CityViewport: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(select: select) }
     func makeUIView(context: Context) -> SCNView {
         let view = PausableCityView(frame: .zero, options: nil); view.backgroundColor = .clear; view.antialiasingMode = .multisampling2X; view.preferredFramesPerSecond = 30
-        view.isPlaying = true; view.autoenablesDefaultLighting = false; view.allowsCameraControl = false
+        view.ambientAnimationEnabled = active && !GameRuntime.isUITesting
+        view.autoenablesDefaultLighting = false; view.allowsCameraControl = false
         // SwiftUI's list of places exposes equivalent actions without traversing SceneKit.
         view.isAccessibilityElement = false; view.accessibilityElementsHidden = true
         let coordinator=context.coordinator
@@ -148,7 +149,6 @@ struct CityViewport: UIViewRepresentable {
     func updateUIView(_ view: SCNView, context: Context) {
         context.coordinator.select = select
         context.coordinator.openEvent = openEvent
-        view.isPlaying = active && view.window != nil; view.scene?.isPaused = !active || view.window == nil
         let signature = businesses.map { "\($0.id):\($0.plot ?? -1):\($0.definitionID):\($0.level)" }.joined(separator: ",") + properties.map { "p\($0.id):\($0.renovations)" }.joined(separator: ",") + "\(reduced)"
         if signature != context.coordinator.signature {
             let oldRig = view.scene?.rootNode.childNode(withName: "cameraRig", recursively: false)?.position
@@ -171,6 +171,7 @@ struct CityViewport: UIViewRepresentable {
         }
         context.coordinator.updateNotices(notices, view: view)
         if context.coordinator.focusToken != focusToken { context.coordinator.focusToken = focusToken; context.coordinator.recenter(view) }
+        if let city=view as? PausableCityView { city.ambientAnimationEnabled=active && !GameRuntime.isUITesting;city.updatePlayback() }
     }
     static func dismantleUIView(_ uiView: SCNView, coordinator: Coordinator) { (uiView as? PausableCityView)?.layoutChanged=nil; uiView.isPlaying = false; uiView.scene = nil }
     @MainActor final class Coordinator: NSObject, UIGestureRecognizerDelegate {
@@ -219,7 +220,7 @@ struct CityViewport: UIViewRepresentable {
             projectNotices()
         }
         @objc func projectNotices() {
-            guard let view,view.window != nil,let scene=view.scene,!scene.isPaused else { return }
+            guard let view,view.window != nil,view.scene != nil else { return }
             let zoom = view.pointOfView?.camera?.orthographicScale ?? 0
             var occupied: [CGRect] = []
             for item in notices {
@@ -277,9 +278,15 @@ struct CityViewport: UIViewRepresentable {
 
 @MainActor final class PausableCityView: SCNView {
     var layoutChanged: (() -> Void)?
+    var ambientAnimationEnabled = true
+    func updatePlayback() {
+        isPlaying = window != nil && ambientAnimationEnabled
+        scene?.isPaused = !isPlaying
+        if !isPlaying { setNeedsDisplay() }
+    }
     override func layoutSubviews() { super.layoutSubviews(); layoutChanged?() }
     override func didMoveToWindow() {
-        super.didMoveToWindow(); isPlaying = window != nil; scene?.isPaused = window == nil
+        super.didMoveToWindow(); updatePlayback()
         layoutChanged?()
     }
 }

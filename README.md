@@ -14,7 +14,7 @@ xcodebuild test -project BusinessClicker.xcodeproj -scheme BusinessClicker \
   -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO
 ```
 
-Adapter le simulateur à ceux listés par `xcrun simctl list devices available`. Les tests UI utilisent une sauvegarde Debug distincte de la partie normale.
+Adapter le simulateur à ceux listés par `xcrun simctl list devices available`. Les tests UI utilisent une sauvegarde Debug distincte de la partie normale et suspendent les animations d’ambiance pour vérifier les commandes sans attendre un rendu animé au repos. La version lancée normalement conserve ses animations.
 
 ## Ce qui change dans cette version
 
