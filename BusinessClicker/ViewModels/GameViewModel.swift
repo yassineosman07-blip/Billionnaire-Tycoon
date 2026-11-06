@@ -2,6 +2,8 @@ import Foundation
 import SwiftUI
 import SwiftData
 
+struct EventPresentation: Identifiable { var id: Int }
+
 @MainActor final class GameViewModel: ObservableObject {
     @Published private(set) var world = World()
     @Published var error: String?
@@ -9,6 +11,9 @@ import SwiftData
     @Published var busy = false
     @Published var offlineSummary: String?
     @Published var showReport = false
+    @Published var activeEvent: EventPresentation?
+    @Published var dayMessage: String?
+    private var automaticEventDay: Int?
     @Published var feedbackToken = 0
     @Published var active = true
     @Published private(set) var forecast: Money = 0
@@ -51,18 +56,31 @@ import SwiftData
             }
         } catch { self.error = error.localizedDescription }
         busy = false
+        presentNextEvent()
     }
     func advance(days: Int = 1) async {
-        guard !busy, !loadFailure else { return }
+        guard !busy, !loadFailure, activeEvent == nil else { return }
         busy = true; let initial = world; let now = Date()
         do {
             let result = try await Task.detached(priority: .userInitiated) { () -> World in
                 var copy = initial; try Engine.manual(&copy, days: days, now: now); return copy
             }.value
-            try store.save(result); world = result; refreshForecast(); feedbackToken += 1; showReport = true
+            try store.save(result); world = result; refreshForecast(); feedbackToken += 1; dayMessage = "Jour \(world.day) · dernier bénéfice \(value(world.reports.last?.profit ?? 0))"
             feedback.play("success", settings: world.settings)
         } catch { self.error = error.localizedDescription }
         busy = false
+        presentNextEvent()
+    }
+    func presentNextEvent() {
+        guard !busy, !loadFailure, world.introComplete, activeEvent == nil, !showReport, offlineSummary == nil, error == nil, automaticEventDay != world.day else { return }
+        if let event = world.events.first(where: { !$0.resolved }) { automaticEventDay = world.day; activeEvent = EventPresentation(id: event.id) }
+    }
+    func openEvent(_ id: Int) {
+        guard !busy, !showReport, activeEvent == nil, world.events.contains(where: { $0.id == id && !$0.resolved }) else { return }
+        automaticEventDay = world.day; activeEvent = EventPresentation(id: id)
+    }
+    func resolveEvent(_ id: Int, option: Int) {
+        if perform(sound: "success", { try Engine.choose(&$0, event: id, option: option) }) { activeEvent = nil }
     }
     func finishIntro(name: String, avatar: String) {
         perform(sound: "success") { w in w.name = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(30)); if w.name.isEmpty { w.name = "Alex" }; w.avatar = avatar; w.introComplete = true; w.lastSimulated = Date() }
@@ -72,7 +90,7 @@ import SwiftData
     }
     func reset() {
         guard !busy else { return }
-        do { let fresh = World(); try store.save(fresh); world = fresh; refreshForecast(); loadFailure = false; error = nil; feedback.apply(fresh.settings); Task { _ = try? await feedback.notifications(enabled: false) } }
+        do { let fresh = World(); try store.save(fresh); world = fresh; activeEvent = nil; automaticEventDay = nil; dayMessage = nil; refreshForecast(); loadFailure = false; error = nil; feedback.apply(fresh.settings); Task { _ = try? await feedback.notifications(enabled: false) } }
         catch { self.error = error.localizedDescription }
     }
     func setting(_ key: WritableKeyPath<Settings, Bool>, value: Bool) { perform(sound: "click") { $0.settings[keyPath: key] = value } }

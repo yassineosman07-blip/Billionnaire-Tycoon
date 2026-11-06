@@ -26,7 +26,7 @@ struct ShopCategoryView: View {
                         Text(shop.subtitle).font(.subheadline).foregroundStyle(.secondary)
                         Text("Entrer dans le magasin").font(.caption.bold()).foregroundStyle(.orange)
                     }
-                }.buttonStyle(.plain)
+                }.buttonStyle(.plain).accessibilityIdentifier("shop-\(shop.id)")
             }
         }.navigationTitle(ShopCatalog.categories[category].name)
     }
@@ -48,7 +48,7 @@ struct ShopInteriorView: View {
                         HStack { Text(Catalog.luxuries[id].name).font(.headline); Spacer(); Text(game.value(shop.price(id))).font(.subheadline.bold()) }
                         if game.world.owns(id) { Label("Dans votre collection", systemImage: "checkmark.seal.fill").font(.caption).foregroundStyle(Palette.mint) }
                     }
-                }.buttonStyle(.plain)
+                }.buttonStyle(.plain).accessibilityIdentifier("shop-item-\(id)")
             }
         }.navigationTitle(shop.name).navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $selectedItem) { ItemDetailView(shopID: shopID, itemID: $0) }

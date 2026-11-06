@@ -139,7 +139,7 @@ final class SimulationTests: XCTestCase {
         XCTAssertEqual(try SaveCodec.decode(SaveCodec.encode(w)).children, 1)
     }
     func testEventAndGoalRewardsCannotRepeat() throws {
-        var w = rich(); for _ in 0..<3 { try Engine.advance(&w) }
+        var w = rich(); Engine.rollDailyEvent(&w, probability: 1); for _ in 0..<3 { try Engine.advance(&w) }
         let id = w.events[0].id; try Engine.choose(&w, event: id, option: 0)
         XCTAssertEqual(w.boosts.count, 1); XCTAssertThrowsError(try Engine.choose(&w, event: id, option: 0))
         try Engine.claim(&w, key: "first-service"); XCTAssertThrowsError(try Engine.claim(&w, key: "first-service"))

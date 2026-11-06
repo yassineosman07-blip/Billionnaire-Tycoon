@@ -40,7 +40,7 @@ struct PatrimonyView: View {
                 }
                 ForEach(ShopCatalog.categories) { category in NavigationLink { ShopCategoryView(category: category.id) } label: {
                     HStack { IconBadge(symbol: category.symbol, color: .orange); Text(category.name).font(.headline); Spacer(); Image(systemName: "chevron.right") }.padding(14).background(Palette.surface, in: RoundedRectangle(cornerRadius: 18))
-                }.buttonStyle(.plain) }
+                }.buttonStyle(.plain).accessibilityIdentifier("shop-category-\(category.id)") }
             }
         }.navigationTitle("Votre patrimoine")
     }

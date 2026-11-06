@@ -317,16 +317,7 @@ public enum Engine {
             w.appointments[i].resolved = true; notes.append("Rendez-vous avec \(w.personName(a.person)) : \(success ? "une belle rencontre" : "à mieux préparer").")
             let id = w.identifier(); w.messages.append(Message(id: id, person: a.person, day: day, text: success ? "Merci pour ce moment. On se revoit bientôt !" : "Reprenons le temps d’en discuter une autre fois."))
         }
-        if day % 3 == 0 && w.events.filter({ !$0.resolved }).count < 12 {
-            let eligible = Catalog.story.filter { definition in
-                definition.eligible(w) && !w.events.contains { $0.key == "template-\(definition.id)" && (definition.oneShot || day - $0.day < 45) }
-            }
-            if !eligible.isEmpty {
-                let index = Int(sample(seed: w.seed, day: day, salt: 771) * Double(eligible.count))
-                let definition = eligible[index]; let id = w.identifier()
-                w.events.append(StoryEvent(id: id, key: "template-\(definition.id)", day: day, title: definition.title, text: definition.text))
-            }
-        }
+        rollDailyEvent(&w)
         if day % 5 == 0 {
             let p = min(Catalog.people.count - 1, day / 5); let id = w.identifier()
             if w.social.known.contains(p) { w.messages.append(Message(id: id, person: p, day: day, text: "J’ai entendu parler de votre aventure. Et si nous prenions le temps d’échanger ?")) }

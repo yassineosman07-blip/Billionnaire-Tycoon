@@ -127,6 +127,7 @@ public struct World: Codable, Equatable, Sendable {
     public var orders: [Order] = []; public var properties: [Property] = []; public var sales: [Sale] = []
     public var luxuries: [Int] = []; public var relationships: [Relationship]; public var messages: [Message] = []
     public var appointments: [Appointment] = []; public var events: [StoryEvent] = []; public var boosts: [Boost] = []
+    public var dailyEventRolls: [DailyEventRoll] = []
     public var reports: [DailyReport] = []; public var claimed: [String] = []; public var settings = Settings()
     public var partner: Int?; public var married = false; public var children = 0; public var lastFamilyDay = -1
     public var totalCustomers = 0; public var totalOrders = 0; public var totalUpgrades = 0; public var totalSocial = 0
@@ -163,6 +164,7 @@ public struct World: Codable, Equatable, Sendable {
         appointments = try c.decode(type(of: appointments), forKey: .appointments)
         events = try c.decode(type(of: events), forKey: .events)
         boosts = try c.decode(type(of: boosts), forKey: .boosts)
+        dailyEventRolls = try c.decodeIfPresent([DailyEventRoll].self, forKey: .dailyEventRolls) ?? []
         reports = try c.decode(type(of: reports), forKey: .reports)
         claimed = try c.decode(type(of: claimed), forKey: .claimed)
         settings = try c.decode(type(of: settings), forKey: .settings)

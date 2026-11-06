@@ -69,6 +69,8 @@ extension Engine {
         w.social.records.append(record); return record
     }
     static func validateRevision(_ w: World) throws {
+        guard w.dailyEventRolls.count <= 730, Set(w.dailyEventRolls.map(\.day)).count == w.dailyEventRolls.count,
+              w.dailyEventRolls.allSatisfy({ roll in (1...w.day).contains(roll.day) && (roll.event == nil || w.events.contains { $0.id == roll.event }) }) else { throw GameError.invalid("Historique de tirages quotidiens invalide.") }
         let plots = w.businesses.compactMap(\.plot)
         guard w.businesses.count <= 120, plots.count == w.businesses.count, Set(plots).count == plots.count,
               w.businesses.allSatisfy({ b in
